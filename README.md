@@ -32,7 +32,7 @@ Ouvrir le dossier dans VS Code et lancer `index.html` avec l'extension **Live Se
 ```
 Calendar/
 ├── index.html
-├── css/style.css
+├── css/styles.css
 ├── js/data.js     → données des cadeaux
 ├── js/app.js      → logique du calendrier
 └── assets/        → images et vidéos
