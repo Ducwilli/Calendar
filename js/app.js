@@ -12,9 +12,18 @@ function afficherCadeau(numeroJour){
     titreFenetre.textContent = `Jour ${numeroJour}`;
     texteFenetreCadeau.textContent = cadeau.texte;
 
+    mediaFenetreCadeau.replaceChildren();
     if (cadeau.typeMedia === "image"){
+        const img = document.createElement("img");
+        img.src = cadeau.lienMedia;
+        img.alt = cadeau.texteAlt;
+        mediaFenetreCadeau.appendChild(img);
     }
-    if (cadeau.typeMedia === "video"){
+    else if (cadeau.typeMedia === "video"){
+        const video = document.createElement("video");
+        video.src = cadeau.lienMedia;
+        video.controls = true;
+        mediaFenetreCadeau.appendChild(video);
     }
     fenetreCadeau.showModal();
 };
@@ -28,4 +37,9 @@ for (let i = 1; i <= 24; i++){
     grille.appendChild(caseJour);
 }
 
-boutonFermerCadeau.addEventListener("click", () => {fenetreCadeau.close()});
+boutonFermerCadeau.addEventListener("click", () => {
+    fenetreCadeau.close()
+});
+fenetreCadeau.addEventListener("close", () => {
+    mediaFenetreCadeau.replaceChildren();
+});
