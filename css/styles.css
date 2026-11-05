@@ -1,21 +1,37 @@
 /* =========================================================
    Calendrier de l'Avent — styles.css
-   Pensé mobile d'abord, adapté aux grands écrans en bas.
+   Style mosaïque : cases de tailles et couleurs variées,
+   chiffres géants dans des polices différentes.
+   Mobile d'abord (4 colonnes), ordinateur ensuite (8 colonnes).
    ========================================================= */
 
-/* ===== Couleurs et réglages ===== */
+@import url("https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Fredoka:wght@600&family=Playfair+Display:ital,wght@1,700&display=swap");
+
+/* ===== Couleurs, polices, réglages ===== */
 :root {
-    --fond: #0f2e22;            /* vert sapin foncé */
-    --fond-clair: #174a37;
-    --case: #b8312f;            /* rouge Noël */
-    --case-survol: #cf4441;
-    --case-ouverte: #f6efe2;    /* crème */
-    --texte: #fdf8ef;
-    --texte-sombre: #2b1d14;
-    --accent: #e8b84a;          /* doré */
-    --rayon: 14px;
-    --ombre: 0 6px 18px rgba(0, 0, 0, 0.35);
-    --police: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --rouge: #e63b2e;
+    --rouge-fonce: #b8231c;
+    --vert: #0f3d3a;
+    --vert-moyen: #1e6b62;
+    --turquoise: #6ccfc0;
+    --menthe: #b6f5e8;
+    --moutarde: #f4b63f;
+    --ocre: #cf9440;
+    --creme: #f7efe1;
+    --blanc: #fffaf2;
+    --nuit: #081d1b;            /* fond de la page, plus sombre que les cases vertes */
+
+    --police-texte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --f-affiche: "Abril Fatface", Georgia, serif;
+    --f-etroite: "Bebas Neue", "Arial Narrow", sans-serif;
+    --f-ronde: "Fredoka", "Arial Rounded MT Bold", sans-serif;
+    --f-italique: "Playfair Display", Georgia, serif;
+
+    --ecart: 0.5rem;
+    --marge: 1rem;
+    --rayon: 4px;
+    /* côté d'une case 1x1 : (largeur utile - écarts) / 4 colonnes */
+    --unite: calc((100vw - 2 * var(--marge) - 3 * var(--ecart)) / 4);
 }
 
 /* ===== Réinitialisation ===== */
@@ -25,8 +41,7 @@
     box-sizing: border-box;
 }
 
-/* Indispensable : sans cette règle, un display: grid ou flex
-   écrit plus bas l'emporterait sur l'attribut hidden. */
+/* Sans cette règle, un display: grid écrit plus bas l'emporterait sur hidden */
 [hidden] {
     display: none !important;
 }
@@ -34,31 +49,35 @@
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: var(--police);
-    font-size: 1rem;
+    padding: 1.5rem var(--marge) 3rem;
+    font-family: var(--police-texte);
     line-height: 1.5;
-    color: var(--texte);
-    background: radial-gradient(circle at top, var(--fond-clair), var(--fond) 70%);
-    padding: 1.5rem 1rem 3rem;
+    color: var(--blanc);
+    background-color: var(--nuit);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
 }
 
 /* ===== En-tête ===== */
 header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 h1 {
     margin: 0;
-    font-size: 1.6rem;
-    line-height: 1.2;
-    color: var(--accent);
-    letter-spacing: 0.02em;
+    font-family: var(--f-affiche);
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 1.1;
+    color: var(--moutarde);
 }
 
 h2 {
     margin: 0 0 0.75rem;
-    font-size: 1.3rem;
+    font-family: var(--f-affiche);
+    font-weight: 400;
+    font-size: 1.6rem;
 }
 
 main {
@@ -69,12 +88,12 @@ main {
 /* ===== Boutons ===== */
 button {
     font: inherit;
-    font-weight: 600;
-    color: var(--texte-sombre);
-    background: var(--accent);
+    font-weight: 700;
+    color: var(--vert);
+    background: var(--moutarde);
     border: none;
     border-radius: 999px;
-    padding: 0.7rem 1.4rem;
+    padding: 0.75rem 1.5rem;
     cursor: pointer;
     transition: transform 0.15s ease, filter 0.15s ease;
 }
@@ -88,138 +107,222 @@ button:active {
 }
 
 button:focus-visible {
-    outline: 3px solid var(--texte);
+    outline: 3px solid var(--blanc);
     outline-offset: 3px;
 }
 
-/* ===== Écran d'attente ===== */
-#ecran-attente {
+/* ===== Écrans d'attente et de Noël ===== */
+#ecran-attente,
+#ecran-noel {
     text-align: center;
     padding: 2.5rem 1rem;
-    background: rgba(255, 255, 255, 0.06);
     border-radius: var(--rayon);
+    background-color: var(--rouge);
+    background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 12px, transparent 12px 24px);
+}
+
+#ecran-noel {
+    background-color: var(--vert-moyen);
+}
+
+#ecran-noel h2 {
+    font-size: 2.4rem;
+    color: var(--moutarde);
 }
 
 #compte-a-rebours {
     margin: 0;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--accent);
-    font-variant-numeric: tabular-nums; /* les chiffres ne « sautent » pas */
+    font-family: var(--f-etroite);
+    font-size: 2.6rem;
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    color: var(--blanc);
+    font-variant-numeric: tabular-nums;
 }
 
-/* ===== Écran de Noël ===== */
-#ecran-noel {
-    text-align: center;
-    padding: 2.5rem 1rem;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: var(--rayon);
-}
-
-#ecran-noel h2 {
-    font-size: 2rem;
-    color: var(--accent);
-}
-
-/* ===== Grille ===== */
+/* ===== La mosaïque (mobile : 4 colonnes) ===== */
 #grille {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
+    gap: var(--ecart);
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-flow: dense; /* comble les trous quand des cases sont plus grandes */
-    gap: 0.6rem;
+    grid-auto-rows: var(--unite); /* des lignes aussi hautes que les colonnes : cases carrées */
+    grid-template-areas:
+        "d7  d18 d18 d3"
+        "d12 d18 d18 d3"
+        "d12 d1  d10 d10"
+        "d22 d22 d10 d10"
+        "d22 d22 d5  d16"
+        "d8  d13 d13 d16"
+        "d8  d24 d24 d4"
+        "d19 d24 d24 d4"
+        "d19 d11 d6  d6"
+        "d15 d11 d21 d21"
+        "d15 d9  d9  d23"
+        "d2  d14 d17 d23"
+        "d20 d20 d17 d23";
 }
 
+/* ===== Une case ===== */
 #grille li {
-    aspect-ratio: 1;
+    --bg: var(--rouge);
+    --fg: var(--blanc);
+    --police-chiffre: var(--f-affiche);
+    --echelle: 0.62;  /* taille du chiffre par rapport au côté d'une case */
+    --grand: 1;       /* 2 pour les cases de 2x2 */
+    --motif: none;
+    --deco: "";
+
+    position: relative;
     display: grid;
     place-items: center;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--texte);
-    background: var(--case);
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    overflow: hidden;
     border-radius: var(--rayon);
-    box-shadow: var(--ombre);
+    background-color: var(--bg);
+    background-image: var(--motif);
+    color: var(--fg);
+    font-family: var(--police-chiffre);
+    font-weight: 400;
+    font-size: calc(var(--unite) * var(--echelle) * var(--grand));
+    line-height: 1;
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+/* Petit décor dans le coin */
+#grille li::after {
+    content: var(--deco);
+    position: absolute;
+    top: 6%;
+    right: 8%;
+    font-family: var(--police-texte);
+    font-size: calc(var(--unite) * 0.18);
+    color: var(--fg);
+    opacity: 0.75;
 }
 
 #grille li:hover {
-    background: var(--case-survol);
-    transform: translateY(-3px);
+    filter: brightness(1.08);
 }
 
 #grille li:active {
-    transform: scale(0.95);
+    transform: scale(0.97);
 }
 
-/* Case déjà ouverte */
+/* ===== Placement, couleurs et polices de chaque jour ===== */
+#grille li:nth-child(1)  { grid-area: d1;  --bg: var(--moutarde);   --fg: var(--blanc);      --police-chiffre: var(--f-affiche); }
+#grille li:nth-child(2)  { grid-area: d2;  --bg: var(--turquoise);  --fg: var(--blanc);      --police-chiffre: var(--f-ronde); --deco: "♪"; }
+#grille li:nth-child(3)  { grid-area: d3;  --bg: var(--rouge);      --fg: var(--rouge-fonce); --police-chiffre: var(--f-etroite); --echelle: 0.8; }
+#grille li:nth-child(4)  { grid-area: d4;  --bg: var(--vert);       --fg: var(--blanc);      --police-chiffre: var(--f-etroite); --echelle: 0.8;
+                           --motif: radial-gradient(circle, var(--moutarde) 2px, transparent 2.5px); }
+#grille li:nth-child(5)  { grid-area: d5;  --bg: var(--ocre);       --fg: var(--blanc);      --police-chiffre: var(--f-italique); --deco: "✦"; }
+#grille li:nth-child(6)  { grid-area: d6;  --bg: var(--vert-moyen); --fg: var(--turquoise);  --police-chiffre: var(--f-etroite); --echelle: 0.8; }
+#grille li:nth-child(7)  { grid-area: d7;  --bg: var(--vert-moyen); --fg: var(--vert);       --police-chiffre: var(--f-etroite); --echelle: 0.8; --deco: "❄"; }
+#grille li:nth-child(8)  { grid-area: d8;  --bg: var(--turquoise);  --fg: var(--vert);       --police-chiffre: var(--f-ronde); }
+#grille li:nth-child(9)  { grid-area: d9;  --bg: var(--moutarde);   --fg: var(--blanc);      --police-chiffre: var(--f-italique); --deco: "★"; }
+#grille li:nth-child(10) { grid-area: d10; --bg: var(--turquoise);  --fg: var(--menthe);     --police-chiffre: var(--f-ronde); --deco: "♫"; }
+#grille li:nth-child(11) { grid-area: d11; --bg: var(--rouge);      --fg: var(--blanc);      --police-chiffre: var(--f-italique); }
+#grille li:nth-child(12) { grid-area: d12; --bg: var(--moutarde);   --fg: var(--ocre);       --police-chiffre: var(--f-etroite); --echelle: 0.8; }
+#grille li:nth-child(13) { grid-area: d13; --bg: var(--rouge);      --fg: var(--vert);       --police-chiffre: var(--f-ronde);
+                           --motif: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 8px, transparent 8px 16px); }
+#grille li:nth-child(14) { grid-area: d14; --bg: var(--ocre);       --fg: var(--blanc);      --police-chiffre: var(--f-affiche); }
+#grille li:nth-child(15) { grid-area: d15; --bg: var(--vert);       --fg: var(--rouge);      --police-chiffre: var(--f-etroite); --echelle: 0.8; --deco: "♪"; }
+#grille li:nth-child(16) { grid-area: d16; --bg: var(--turquoise);  --fg: var(--vert);       --police-chiffre: var(--f-etroite); --echelle: 0.8; }
+#grille li:nth-child(17) { grid-area: d17; --bg: var(--vert);       --fg: var(--turquoise);  --police-chiffre: var(--f-ronde); --deco: "✦"; }
+#grille li:nth-child(18) { grid-area: d18; --bg: var(--vert-moyen); --fg: var(--vert);       --police-chiffre: var(--f-ronde);
+                           --motif: radial-gradient(circle, rgba(255, 255, 255, 0.18) 3px, transparent 3.5px); }
+#grille li:nth-child(19) { grid-area: d19; --bg: var(--moutarde);   --fg: var(--ocre);       --police-chiffre: var(--f-etroite); --echelle: 0.8; }
+#grille li:nth-child(20) { grid-area: d20; --bg: var(--rouge);      --fg: var(--blanc);      --police-chiffre: var(--f-affiche); --deco: "❄";
+                           --motif: radial-gradient(circle, var(--rouge-fonce) 6px, transparent 6.5px); }
+#grille li:nth-child(21) { grid-area: d21; --bg: var(--rouge);      --fg: var(--blanc);      --police-chiffre: var(--f-affiche); }
+#grille li:nth-child(22) { grid-area: d22; --bg: var(--moutarde);   --fg: var(--blanc);      --police-chiffre: var(--f-ronde);
+                           --motif: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.12) 0 10px, transparent 10px 20px); }
+#grille li:nth-child(23) { grid-area: d23; --bg: var(--turquoise);  --fg: var(--menthe);     --police-chiffre: var(--f-etroite); --echelle: 0.8; }
+#grille li:nth-child(24) { grid-area: d24; --bg: var(--vert);       --fg: var(--blanc);      --police-chiffre: var(--f-affiche); --deco: "★";
+                           --motif: radial-gradient(circle, rgba(255, 255, 255, 0.35) 1.5px, transparent 2px); }
+
+/* Cases de 2x2 sur téléphone : chiffre deux fois plus grand */
+#grille li:nth-child(10),
+#grille li:nth-child(18),
+#grille li:nth-child(22),
+#grille li:nth-child(24) {
+    --grand: 1.8;
+}
+
+/* Les motifs en pois se répètent sur une petite grille */
+#grille li:nth-child(4),
+#grille li:nth-child(18),
+#grille li:nth-child(20),
+#grille li:nth-child(24) {
+    background-size: 18px 18px;
+}
+
+/* ===== États ===== */
+
+/* Ouvrable mais pas encore ouverte : un liseré doré qui pulse pour inviter au clic */
+#grille li:not(.verrouillee):not(.ouverte) {
+    box-shadow: inset 0 0 0 3px var(--moutarde);
+    animation: invitation 2.2s ease-in-out infinite;
+}
+
+@keyframes invitation {
+    0%, 100% { box-shadow: inset 0 0 0 3px var(--moutarde); }
+    50% { box-shadow: inset 0 0 0 6px var(--moutarde); }
+}
+
+/* Déjà ouverte : la porte est « retournée », couleurs inversées */
 #grille li.ouverte {
-    color: var(--case);
-    background: var(--case-ouverte);
-    border-color: var(--accent);
+    background-color: var(--creme);
+    background-image: none;
+    color: var(--bg);
+    animation: ouverture 0.5s ease;
 }
 
-#grille li.ouverte:hover {
-    background: var(--case-ouverte);
+#grille li.ouverte::after {
+    content: "✓";
+    color: var(--bg);
 }
 
-/* Case pas encore ouvrable */
+@keyframes ouverture {
+    0% { transform: perspective(600px) rotateY(0); }
+    50% { transform: perspective(600px) rotateY(90deg); }
+    100% { transform: perspective(600px) rotateY(0); }
+}
+
+/* Pas encore ouvrable */
 #grille li.verrouillee {
-    color: rgba(255, 255, 255, 0.55);
-    background: rgba(184, 49, 47, 0.45);
-    box-shadow: none;
     cursor: not-allowed;
+    filter: saturate(0.85);
 }
 
 #grille li.verrouillee:hover {
+    filter: saturate(0.85);
+}
+
+#grille li.verrouillee:active {
     transform: none;
 }
 
-/* Mode « cadeaux non ouverts » (après Noël) :
-   la grille reçoit la classe non-ouverts, les cases ouvertes disparaissent */
-#grille.non-ouverts li.ouverte {
-    display: none;
-}
-
-/* Tailles variables (classes à poser depuis le JS) */
-#grille li.taille-large {
-    grid-column: span 2;
-    aspect-ratio: auto;
-}
-
-#grille li.taille-grande {
-    grid-column: span 2;
-    grid-row: span 2;
-    font-size: 2.2rem;
-}
-
-/* ===== Animations ===== */
+/* Secousse au clic sur une case verrouillée */
 @keyframes secousse {
     0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px) rotate(-3deg); }
-    40% { transform: translateX(6px) rotate(3deg); }
-    60% { transform: translateX(-4px) rotate(-2deg); }
-    80% { transform: translateX(4px) rotate(2deg); }
+    20% { transform: translateX(-6px) rotate(-2deg); }
+    40% { transform: translateX(6px) rotate(2deg); }
+    60% { transform: translateX(-4px) rotate(-1deg); }
+    80% { transform: translateX(4px) rotate(1deg); }
 }
 
 #grille li.secousse {
     animation: secousse 0.4s ease;
 }
 
-@keyframes ouverture {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.12) rotate(-2deg); }
-    100% { transform: scale(1); }
-}
-
-#grille li.ouverte {
-    animation: ouverture 0.35s ease;
+/* Après Noël, mode « cadeaux non ouverts » : les cases ouvertes s'effacent */
+#grille.non-ouverts li.ouverte {
+    visibility: hidden;
 }
 
 /* ===== Fenêtre cadeau ===== */
@@ -227,31 +330,32 @@ button:focus-visible {
     width: min(92vw, 520px);
     max-height: 90vh;
     padding: 1.5rem;
-    color: var(--texte-sombre);
-    background: var(--case-ouverte);
-    border: 3px solid var(--accent);
+    color: var(--vert);
+    background: var(--creme);
+    border: none;
+    border-top: 10px solid var(--rouge);
     border-radius: var(--rayon);
-    box-shadow: var(--ombre);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     text-align: center;
 }
 
 #fenetre-cadeau::backdrop {
-    background: rgba(5, 20, 14, 0.75);
+    background: rgba(8, 30, 28, 0.8);
     backdrop-filter: blur(3px);
 }
 
 #fenetre-cadeau[open] {
-    animation: apparition 0.25s ease;
+    animation: apparition 0.3s ease;
 }
 
 @keyframes apparition {
-    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    from { opacity: 0; transform: translateY(24px) scale(0.95); }
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 #cadeau-titre {
-    color: var(--case);
-    font-size: 1.5rem;
+    font-size: 2rem;
+    color: var(--rouge);
 }
 
 #cadeau-media:empty {
@@ -265,45 +369,72 @@ button:focus-visible {
     max-height: 55vh;
     height: auto;
     margin: 0 auto 1rem;
-    border-radius: calc(var(--rayon) - 4px);
+    border-radius: var(--rayon);
     object-fit: contain;
 }
 
 #cadeau-texte {
     margin: 0 0 1.25rem;
-    font-size: 1.1rem;
-    white-space: pre-line; /* respecte les retours à la ligne du texte */
+    font-size: 1.15rem;
+    white-space: pre-line;
 }
 
 #cadeau-texte:empty {
     display: none;
 }
 
-/* ===== Grands écrans (tablette, ordinateur) ===== */
+#cadeau-fermer {
+    color: var(--blanc);
+    background: var(--rouge);
+}
+
+/* ===== Grands écrans : mosaïque sur 8 colonnes ===== */
 @media (min-width: 640px) {
+    :root {
+        --ecart: 0.75rem;
+        --marge: 2rem;
+        --unite: calc((min(100vw - 2 * var(--marge), 960px) - 7 * var(--ecart)) / 8);
+    }
+
     body {
-        padding: 2.5rem 2rem 4rem;
+        padding-top: 2.5rem;
     }
 
     h1 {
-        font-size: 2.2rem;
+        font-size: 3rem;
     }
 
     #grille {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 0.9rem;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-areas:
+            "d1  d1  d14 d7  d7  d19 d19 d3"
+            "d1  d1  d22 d22 d10 d19 d19 d3"
+            "d16 d9  d22 d22 d10 d5  d24 d24"
+            "d16 d9  d11 d11 d20 d5  d24 d24"
+            "d6  d6  d11 d11 d20 d13 d18 d17"
+            "d2  d21 d21 d8  d15 d12 d4  d23";
     }
 
-    #grille li {
-        font-size: 1.7rem;
+    /* Sur ordinateur, ce ne sont plus les mêmes cases qui font 2x2 */
+    #grille li:nth-child(10),
+    #grille li:nth-child(18) {
+        --grand: 1;
+    }
+
+    #grille li:nth-child(1),
+    #grille li:nth-child(11),
+    #grille li:nth-child(19),
+    #grille li:nth-child(22),
+    #grille li:nth-child(24) {
+        --grand: 1.8;
     }
 
     #compte-a-rebours {
-        font-size: 2.6rem;
+        font-size: 4rem;
     }
 }
 
-/* ===== Accessibilité : moins d'animations si l'utilisateur le demande ===== */
+/* ===== Moins d'animations si l'utilisateur le demande ===== */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

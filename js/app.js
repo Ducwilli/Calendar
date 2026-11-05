@@ -29,7 +29,7 @@ function marquerOuvert(numeroJour) {
 }
 
 // ===== Simulation de date (mettre null pour la vraie date) =====
-const dateSimulee = null; //new Date(calendrierAvent.annee, 11, 7, 16, 37);
+const dateSimulee = new Date(calendrierAvent.annee, 11, 7, 16, 37);
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {
