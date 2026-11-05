@@ -1,0 +1,314 @@
+/* =========================================================
+   Calendrier de l'Avent — styles.css
+   Pensé mobile d'abord, adapté aux grands écrans en bas.
+   ========================================================= */
+
+/* ===== Couleurs et réglages ===== */
+:root {
+    --fond: #0f2e22;            /* vert sapin foncé */
+    --fond-clair: #174a37;
+    --case: #b8312f;            /* rouge Noël */
+    --case-survol: #cf4441;
+    --case-ouverte: #f6efe2;    /* crème */
+    --texte: #fdf8ef;
+    --texte-sombre: #2b1d14;
+    --accent: #e8b84a;          /* doré */
+    --rayon: 14px;
+    --ombre: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --police: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ===== Réinitialisation ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Indispensable : sans cette règle, un display: grid ou flex
+   écrit plus bas l'emporterait sur l'attribut hidden. */
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--police);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--texte);
+    background: radial-gradient(circle at top, var(--fond-clair), var(--fond) 70%);
+    padding: 1.5rem 1rem 3rem;
+}
+
+/* ===== En-tête ===== */
+header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+}
+
+h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.3rem;
+}
+
+main {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+/* ===== Boutons ===== */
+button {
+    font: inherit;
+    font-weight: 600;
+    color: var(--texte-sombre);
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 0.7rem 1.4rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+button:hover {
+    filter: brightness(1.08);
+}
+
+button:active {
+    transform: scale(0.96);
+}
+
+button:focus-visible {
+    outline: 3px solid var(--texte);
+    outline-offset: 3px;
+}
+
+/* ===== Écran d'attente ===== */
+#ecran-attente {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: var(--rayon);
+}
+
+#compte-a-rebours {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums; /* les chiffres ne « sautent » pas */
+}
+
+/* ===== Écran de Noël ===== */
+#ecran-noel {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: var(--rayon);
+}
+
+#ecran-noel h2 {
+    font-size: 2rem;
+    color: var(--accent);
+}
+
+/* ===== Grille ===== */
+#grille {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-flow: dense; /* comble les trous quand des cases sont plus grandes */
+    gap: 0.6rem;
+}
+
+#grille li {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--texte);
+    background: var(--case);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+#grille li:hover {
+    background: var(--case-survol);
+    transform: translateY(-3px);
+}
+
+#grille li:active {
+    transform: scale(0.95);
+}
+
+/* Case déjà ouverte */
+#grille li.ouverte {
+    color: var(--case);
+    background: var(--case-ouverte);
+    border-color: var(--accent);
+}
+
+#grille li.ouverte:hover {
+    background: var(--case-ouverte);
+}
+
+/* Case pas encore ouvrable */
+#grille li.verrouillee {
+    color: rgba(255, 255, 255, 0.55);
+    background: rgba(184, 49, 47, 0.45);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+#grille li.verrouillee:hover {
+    transform: none;
+}
+
+/* Mode « cadeaux non ouverts » (après Noël) :
+   la grille reçoit la classe non-ouverts, les cases ouvertes disparaissent */
+#grille.non-ouverts li.ouverte {
+    display: none;
+}
+
+/* Tailles variables (classes à poser depuis le JS) */
+#grille li.taille-large {
+    grid-column: span 2;
+    aspect-ratio: auto;
+}
+
+#grille li.taille-grande {
+    grid-column: span 2;
+    grid-row: span 2;
+    font-size: 2.2rem;
+}
+
+/* ===== Animations ===== */
+@keyframes secousse {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px) rotate(-3deg); }
+    40% { transform: translateX(6px) rotate(3deg); }
+    60% { transform: translateX(-4px) rotate(-2deg); }
+    80% { transform: translateX(4px) rotate(2deg); }
+}
+
+#grille li.secousse {
+    animation: secousse 0.4s ease;
+}
+
+@keyframes ouverture {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.12) rotate(-2deg); }
+    100% { transform: scale(1); }
+}
+
+#grille li.ouverte {
+    animation: ouverture 0.35s ease;
+}
+
+/* ===== Fenêtre cadeau ===== */
+#fenetre-cadeau {
+    width: min(92vw, 520px);
+    max-height: 90vh;
+    padding: 1.5rem;
+    color: var(--texte-sombre);
+    background: var(--case-ouverte);
+    border: 3px solid var(--accent);
+    border-radius: var(--rayon);
+    box-shadow: var(--ombre);
+    text-align: center;
+}
+
+#fenetre-cadeau::backdrop {
+    background: rgba(5, 20, 14, 0.75);
+    backdrop-filter: blur(3px);
+}
+
+#fenetre-cadeau[open] {
+    animation: apparition 0.25s ease;
+}
+
+@keyframes apparition {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+#cadeau-titre {
+    color: var(--case);
+    font-size: 1.5rem;
+}
+
+#cadeau-media:empty {
+    display: none;
+}
+
+#cadeau-media img,
+#cadeau-media video {
+    display: block;
+    max-width: 100%;
+    max-height: 55vh;
+    height: auto;
+    margin: 0 auto 1rem;
+    border-radius: calc(var(--rayon) - 4px);
+    object-fit: contain;
+}
+
+#cadeau-texte {
+    margin: 0 0 1.25rem;
+    font-size: 1.1rem;
+    white-space: pre-line; /* respecte les retours à la ligne du texte */
+}
+
+#cadeau-texte:empty {
+    display: none;
+}
+
+/* ===== Grands écrans (tablette, ordinateur) ===== */
+@media (min-width: 640px) {
+    body {
+        padding: 2.5rem 2rem 4rem;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    #grille {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.9rem;
+    }
+
+    #grille li {
+        font-size: 1.7rem;
+    }
+
+    #compte-a-rebours {
+        font-size: 2.6rem;
+    }
+}
+
+/* ===== Accessibilité : moins d'animations si l'utilisateur le demande ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

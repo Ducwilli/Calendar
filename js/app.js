@@ -12,7 +12,7 @@ const boutonNonOuverts = document.getElementById("bouton-non-ouverts");
 
 // ===== Dates de référence =====
 const unJour = 1000 * 60 * 60 * 24;
-const premierDecembre = null;               //new Date(calendrierAvent.annee, 11, 1);
+const premierDecembre = new Date(calendrierAvent.annee, 11, 1);
 const noel = new Date(calendrierAvent.annee, 11, 25);
 
 // ===== Stockage des jours ouverts =====
@@ -29,7 +29,7 @@ function marquerOuvert(numeroJour) {
 }
 
 // ===== Simulation de date (mettre null pour la vraie date) =====
-const dateSimulee = new Date(calendrierAvent.annee, 11, 7, 16, 37);
+const dateSimulee = null; //new Date(calendrierAvent.annee, 11, 7, 16, 37);
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {
@@ -92,6 +92,11 @@ function construireGrille(dernierJour) {
             });
         } else {
             caseJour.classList.add("verrouillee");
+            caseJour.addEventListener("click", () => {
+                caseJour.classList.remove("secousse");
+                void caseJour.offsetWidth;
+                caseJour.classList.add("secousse");
+            });
         }
         grille.appendChild(caseJour);
     }
@@ -151,6 +156,7 @@ fenetreCadeau.addEventListener("close", () => {
 boutonNonOuverts.addEventListener("click", () => {
     ecranNoel.hidden = true;
     grille.hidden = false;
+    grille.classList.add("non-ouverts");
 });
 
 demarrer();
