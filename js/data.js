@@ -3,6 +3,26 @@ const calendrierAvent = {
     cadeaux: [
         {jour: 1, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
         {jour: 2, typeMedia: "image", texte: "Joyeux noel", lienMedia: "assets/cadeau.png", texteAlt: "image de cadeau"},
-        {jour: 3, typeMedia: "video", texte: null, lienMedia: "assets/msgPereNoel.mp4", texteAlt: "Video du pere noel"}
+        {jour: 3, typeMedia: "video", texte: null, lienMedia: "assets/msgPereNoel.mp4", texteAlt: "Video du pere noel"},
+        {jour: 4, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 5, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 6, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 7, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 8, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 9, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 10, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 11, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 12, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 13, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 14, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 15, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 16, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 18, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 19, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 20, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 21, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 22, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 23, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
+        {jour: 24, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
     ]
 };
