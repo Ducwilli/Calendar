@@ -12,11 +12,24 @@ const boutonNonOuverts = document.getElementById("bouton-non-ouverts");
 
 // ===== Dates de référence =====
 const unJour = 1000 * 60 * 60 * 24;
-const premierDecembre = new Date(calendrierAvent.annee, 11, 1);
+const premierDecembre = null;               //new Date(calendrierAvent.annee, 11, 1);
 const noel = new Date(calendrierAvent.annee, 11, 25);
 
-// ===== Simulation de date =====
-const dateSimulee = null; 
+// ===== Stockage des jours ouverts =====
+const cleStockage = `calendrier-avent-${calendrierAvent.annee}-jours-ouverts`;
+const joursOuvertsTexte = localStorage.getItem(cleStockage);
+const joursOuverts = joursOuvertsTexte === null ? [] : JSON.parse(joursOuvertsTexte);
+
+function marquerOuvert(numeroJour) {
+    if (joursOuverts.includes(numeroJour)) {
+        return;
+    }
+    joursOuverts.push(numeroJour);
+    localStorage.setItem(cleStockage, JSON.stringify(joursOuverts));
+}
+
+// ===== Simulation de date (mettre null pour la vraie date) =====
+const dateSimulee = new Date(calendrierAvent.annee, 11, 7, 16, 37);
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {
@@ -66,9 +79,16 @@ function construireGrille(dernierJour) {
     for (let i = 1; i <= 24; i++) {
         const caseJour = document.createElement("li");
         caseJour.textContent = i;
+
+        if (joursOuverts.includes(i)) {
+            caseJour.classList.add("ouverte");
+        }
+
         if (i <= dernierJour) {
             caseJour.addEventListener("click", () => {
                 afficherCadeau(i);
+                marquerOuvert(i);
+                caseJour.classList.add("ouverte");
             });
         } else {
             caseJour.classList.add("verrouillee");
