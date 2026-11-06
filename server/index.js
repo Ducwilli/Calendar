@@ -1,15 +1,30 @@
 import express from "express";
-import { calendrierAvent } from "./donnees.js";
+import { db } from "./db.js";
 
 const app = express();
 
-// ===== Dates de référence =====
-const unJour = 1000 * 60 * 60 * 24;
-const premierDecembre = new Date(calendrierAvent.annee, 11, 1);
+// Pour l'instant, un seul calendrier (étape 4 : il viendra du code de partage)
+const idCalendrier = 1;
+
+// ===== Requêtes SQL, préparées une seule fois =====
+const lireCalendrier = db.prepare(`
+    SELECT annee
+    FROM calendriers
+    WHERE id = ?
+`);
+
+const lireCadeau = db.prepare(`
+    SELECT texte,
+           type_media AS typeMedia,
+           lien_media AS lienMedia,
+           texte_alt AS texteAlt
+    FROM cadeaux
+    WHERE calendrier_id = ? AND jour = ?
+`);
 
 // ===== Simulation de date (null = vraie date) =====
-// Exemple de test : new Date(calendrierAvent.annee, 11, 7, 10, 0) pour le 7 décembre à 10 h
-const dateSimulee = new Date(calendrierAvent.annee, 11, 7, 10, 0);
+// Exemple de test : new Date(2026, 11, 7, 10, 0) pour le 7 décembre 2026 à 10 h
+const dateSimulee = null;
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {
@@ -17,7 +32,10 @@ function maintenant() {
 }
 
 // ===== Calculs =====
-function dernierJourOuvrable(dateCalcule) {
+const unJour = 1000 * 60 * 60 * 24;
+
+function dernierJourOuvrable(dateCalcule, annee) {
+    const premierDecembre = new Date(annee, 11, 1);
     const ecart = dateCalcule - premierDecembre;
     const numeroDuJour = Math.floor(ecart / unJour) + 1;
 
@@ -36,24 +54,37 @@ app.get("/api/statut", (requete, reponse) => {
 });
 
 app.get("/api/calendrier", (requete, reponse) => {
+    const calendrier = lireCalendrier.get(idCalendrier);
+    if (calendrier === undefined) {
+        return reponse.status(404).json({ erreur: "Calendrier introuvable" });
+    }
+
     reponse.json({
-        annee: calendrierAvent.annee,
+        annee: calendrier.annee,
         date: maintenant()
     });
 });
 
 app.get("/api/cadeaux/:jour", (requete, reponse) => {
+    // 1. Le jour demandé est-il valide ?
     const jour = Number(requete.params.jour);
-
     if (!Number.isInteger(jour) || jour < 1 || jour > 24) {
         return reponse.status(400).json({ erreur: "Jour invalide" });
     }
 
-    if (jour > dernierJourOuvrable(maintenant())) {
+    // 2. Le calendrier existe-t-il ?
+    const calendrier = lireCalendrier.get(idCalendrier);
+    if (calendrier === undefined) {
+        return reponse.status(404).json({ erreur: "Calendrier introuvable" });
+    }
+
+    // 3. Le jour est-il arrivé ?
+    if (jour > dernierJourOuvrable(maintenant(), calendrier.annee)) {
         return reponse.status(403).json({ erreur: "Ce jour n'est pas encore arrivé" });
     }
 
-    const cadeau = calendrierAvent.cadeaux.find((c) => c.jour === jour);
+    // 4. Y a-t-il un cadeau ce jour-là ?
+    const cadeau = lireCadeau.get(idCalendrier, jour);
     if (cadeau === undefined) {
         return reponse.status(404).json({ erreur: "Aucun cadeau pour ce jour" });
     }
