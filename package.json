@@ -2,9 +2,10 @@
   "name": "calendar",
   "version": "1.0.0",
   "description": "Application web (pensée pour mobile) de calendrier de l'Avent : chaque jour du 1er au 24 décembre, une case s'ouvre et révèle un cadeau (texte, image ou vidéo) choisi par son créateur.",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
   },
   "repository": {
     "type": "git",
