@@ -9,7 +9,7 @@ const premierDecembre = new Date(calendrierAvent.annee, 11, 1);
 
 // ===== Simulation de date (null = vraie date) =====
 // Exemple de test : new Date(calendrierAvent.annee, 11, 7, 10, 0) pour le 7 décembre à 10 h
-const dateSimulee = null;
+const dateSimulee = new Date(calendrierAvent.annee, 11, 7, 10, 0);
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {

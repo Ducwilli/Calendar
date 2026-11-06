@@ -10,13 +10,26 @@ const ecranAttente = document.getElementById("ecran-attente");
 const compteARebours = document.getElementById("compte-a-rebours");
 const boutonNonOuverts = document.getElementById("bouton-non-ouverts");
 
+// ===== Informations du serveur =====
+const reponseCalendrier = await fetch("/api/calendrier");
+const infosCalendrier = await reponseCalendrier.json();
+
+const annee = infosCalendrier.annee;
+const dateServeur = new Date(infosCalendrier.date);
+const decalage = dateServeur - Date.now();
+
+// Heure du serveur, qui continue d'avancer
+function maintenant() {
+    return new Date(Date.now() + decalage);
+}
+
 // ===== Dates de référence =====
 const unJour = 1000 * 60 * 60 * 24;
-const premierDecembre = new Date(calendrierAvent.annee, 11, 1);
-const noel = new Date(calendrierAvent.annee, 11, 25);
+const premierDecembre = new Date(annee, 11, 1);
+const noel = new Date(annee, 11, 25);
 
 // ===== Stockage des jours ouverts =====
-const cleStockage = `calendrier-avent-${calendrierAvent.annee}-jours-ouverts`;
+const cleStockage = `calendrier-avent-${annee}-jours-ouverts`;
 const joursOuvertsTexte = localStorage.getItem(cleStockage);
 const joursOuverts = joursOuvertsTexte === null ? [] : JSON.parse(joursOuvertsTexte);
 
@@ -26,14 +39,6 @@ function marquerOuvert(numeroJour) {
     }
     joursOuverts.push(numeroJour);
     localStorage.setItem(cleStockage, JSON.stringify(joursOuverts));
-}
-
-// ===== Simulation de date (mettre null pour la vraie date) =====
-const dateSimulee = null; //new Date(calendrierAvent.annee, 11, 7, 16, 37);
-const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
-
-function maintenant() {
-    return new Date(Date.now() + decalage);
 }
 
 // ===== Calculs =====
@@ -51,14 +56,25 @@ function dernierJourOuvrable(dateCalcule) {
 }
 
 // ===== Fenêtre cadeau =====
-function afficherCadeau(numeroJour) {
-    const cadeau = calendrierAvent.cadeaux.find((c) => c.jour === numeroJour);
+// Renvoie true si un cadeau a été affiché
+async function afficherCadeau(numeroJour) {
+    const reponse = await fetch(`/api/cadeaux/${numeroJour}`);
 
-    if (cadeau === undefined) { return; }
     titreFenetre.textContent = `Jour ${numeroJour}`;
+    mediaFenetreCadeau.replaceChildren();
+
+    if (reponse.status === 404) {
+        texteFenetreCadeau.textContent = "Pas de cadeau pour ce jour… pour l'instant !";
+        fenetreCadeau.showModal();
+        return false;
+    }
+    if (!reponse.ok) {
+        return false;
+    }
+
+    const cadeau = await reponse.json();
     texteFenetreCadeau.textContent = cadeau.texte;
 
-    mediaFenetreCadeau.replaceChildren();
     if (cadeau.typeMedia === "image") {
         const img = document.createElement("img");
         img.src = cadeau.lienMedia;
@@ -70,7 +86,9 @@ function afficherCadeau(numeroJour) {
         video.controls = true;
         mediaFenetreCadeau.appendChild(video);
     }
+
     fenetreCadeau.showModal();
+    return true;
 }
 
 // ===== Grille =====
@@ -85,10 +103,12 @@ function construireGrille(dernierJour) {
         }
 
         if (i <= dernierJour) {
-            caseJour.addEventListener("click", () => {
-                afficherCadeau(i);
-                marquerOuvert(i);
-                caseJour.classList.add("ouverte");
+            caseJour.addEventListener("click", async () => {
+                const cadeauAffiche = await afficherCadeau(i);
+                if (cadeauAffiche) {
+                    marquerOuvert(i);
+                    caseJour.classList.add("ouverte");
+                }
             });
         } else {
             caseJour.classList.add("verrouillee");
