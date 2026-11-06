@@ -9,3 +9,5 @@ node_modules/
 
 # Variables d'environnement (utile à partir de la V2)
 .env
+
+*.db
