@@ -91,6 +91,14 @@ app.get("/api/calendriers/:code/cadeaux/:jour", (requete, reponse) => {
 });
 
 // ===== Pages =====
+app.get("/creer", (requete, reponse) => {
+    reponse.sendFile(resolve("public/creer.html"));
+});
+
+app.get("/", (requete, reponse) => {
+    reponse.sendFile(resolve("public/accueil.html"));
+});
+
 app.get("/c/:code", (requete, reponse) => {
     const calendrier = lireCalendrier.get(requete.params.code);
     if (calendrier === undefined) {
