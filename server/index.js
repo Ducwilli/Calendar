@@ -1,16 +1,14 @@
 import express from "express";
+import { resolve } from "node:path";
 import { db } from "./db.js";
 
 const app = express();
 
-// Pour l'instant, un seul calendrier (étape 4 : il viendra du code de partage)
-const idCalendrier = 1;
-
 // ===== Requêtes SQL, préparées une seule fois =====
 const lireCalendrier = db.prepare(`
-    SELECT annee
+    SELECT id, annee
     FROM calendriers
-    WHERE id = ?
+    WHERE code_partage = ?
 `);
 
 const lireCadeau = db.prepare(`
@@ -53,8 +51,8 @@ app.get("/api/statut", (requete, reponse) => {
     reponse.json({ statut: "ok" });
 });
 
-app.get("/api/calendrier", (requete, reponse) => {
-    const calendrier = lireCalendrier.get(idCalendrier);
+app.get("/api/calendriers/:code", (requete, reponse) => {
+    const calendrier = lireCalendrier.get(requete.params.code);
     if (calendrier === undefined) {
         return reponse.status(404).json({ erreur: "Calendrier introuvable" });
     }
@@ -65,7 +63,7 @@ app.get("/api/calendrier", (requete, reponse) => {
     });
 });
 
-app.get("/api/cadeaux/:jour", (requete, reponse) => {
+app.get("/api/calendriers/:code/cadeaux/:jour", (requete, reponse) => {
     // 1. Le jour demandé est-il valide ?
     const jour = Number(requete.params.jour);
     if (!Number.isInteger(jour) || jour < 1 || jour > 24) {
@@ -73,7 +71,7 @@ app.get("/api/cadeaux/:jour", (requete, reponse) => {
     }
 
     // 2. Le calendrier existe-t-il ?
-    const calendrier = lireCalendrier.get(idCalendrier);
+    const calendrier = lireCalendrier.get(requete.params.code);
     if (calendrier === undefined) {
         return reponse.status(404).json({ erreur: "Calendrier introuvable" });
     }
@@ -84,12 +82,22 @@ app.get("/api/cadeaux/:jour", (requete, reponse) => {
     }
 
     // 4. Y a-t-il un cadeau ce jour-là ?
-    const cadeau = lireCadeau.get(idCalendrier, jour);
+    const cadeau = lireCadeau.get(calendrier.id, jour);
     if (cadeau === undefined) {
         return reponse.status(404).json({ erreur: "Aucun cadeau pour ce jour" });
     }
 
     reponse.json(cadeau);
+});
+
+// ===== Pages =====
+app.get("/c/:code", (requete, reponse) => {
+    const calendrier = lireCalendrier.get(requete.params.code);
+    if (calendrier === undefined) {
+        return reponse.status(404).send("Ce calendrier n'existe pas. Vérifie le lien qu'on t'a envoyé.");
+    }
+
+    reponse.sendFile(resolve("public/index.html"));
 });
 
 // ===== Fichiers du site =====

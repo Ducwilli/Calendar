@@ -1,14 +1,16 @@
 import { db } from "./db.js";
 import { calendrierAvent } from "./donnees.js";
+import { randomBytes } from "node:crypto";
 
 // 1. Vider les tables (les cadeaux d'abord, à cause de la clé étrangère)
 db.exec("DELETE FROM cadeaux;");
 db.exec("DELETE FROM calendriers;");
 
-// 2. Insérer le calendrier et récupérer son id
+// 2. Insérer le calendrier et creer son code de partage
+const codePartage = randomBytes(6).toString("base64url");
 const resultat = db
-    .prepare("INSERT INTO calendriers (annee) VALUES (?)")
-    .run(calendrierAvent.annee);
+    .prepare("INSERT INTO calendriers (annee, code_partage) VALUES (?, ?)")
+    .run(calendrierAvent.annee, codePartage);
 const calendrierId = resultat.lastInsertRowid;
 
 // 3. Préparer l'insertion des cadeaux une seule fois
@@ -29,4 +31,4 @@ for (const cadeau of calendrierAvent.cadeaux) {
     );
 }
 
-console.log(`Calendrier ${calendrierAvent.annee} créé (id ${calendrierId}) avec ${calendrierAvent.cadeaux.length} cadeaux.`);
+console.log(`Calendrier ${calendrierAvent.annee} créé (http://localhost:3000/c/${codePartage}) avec ${calendrierAvent.cadeaux.length} cadeaux.`);

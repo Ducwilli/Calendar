@@ -5,6 +5,7 @@ db.exec("PRAGMA foreign_keys = ON;");
 db.exec(
     `CREATE TABLE IF NOT EXISTS calendriers (
         id INTEGER PRIMARY KEY,
+        code_partage TEXT NOT NULL UNIQUE, 
         annee INTEGER NOT NULL CHECK (annee > 2025)
      );
 

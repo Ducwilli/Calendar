@@ -2,8 +2,8 @@ export const calendrierAvent = {
     annee: 2026,
     cadeaux: [
         {jour: 1, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
-        {jour: 2, typeMedia: "image", texte: "Joyeux noel", lienMedia: "/public/assets/cadeau.png", texteAlt: "image de cadeau"},
-        {jour: 3, typeMedia: "video", texte: null, lienMedia: "/public/assets/msgPereNoel.mp4", texteAlt: "Video du pere noel"},
+        {jour: 2, typeMedia: "image", texte: "Joyeux noel", lienMedia: "/assets/cadeau.png", texteAlt: "image de cadeau"},
+        {jour: 3, typeMedia: "video", texte: null, lienMedia: "/assets/msgPereNoel.mp4", texteAlt: "Video du pere noel"},
         {jour: 4, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
         {jour: 5, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},
         {jour: 6, typeMedia: null, texte: "Joyeux noel", lienMedia: null, texteAlt: null},

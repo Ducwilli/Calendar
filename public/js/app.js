@@ -11,7 +11,17 @@ const compteARebours = document.getElementById("compte-a-rebours");
 const boutonNonOuverts = document.getElementById("bouton-non-ouverts");
 
 // ===== Informations du serveur =====
-const reponseCalendrier = await fetch("/api/calendrier");
+const codePartage = location.pathname.split("/")[2];
+const reponseCalendrier = await fetch(`/api/calendriers/${codePartage}`);
+
+if (!reponseCalendrier.ok) {
+    ecranAttente.querySelector("h2").textContent = "Calendrier introuvable";
+    compteARebours.textContent = "Vérifie le lien";
+    ecranAttente.hidden = false;
+    grille.hidden = true;
+    throw new Error(`Calendrier introuvable (code ${codePartage}, statut ${reponseCalendrier.status})`);
+}
+
 const infosCalendrier = await reponseCalendrier.json();
 
 const annee = infosCalendrier.annee;
@@ -29,7 +39,7 @@ const premierDecembre = new Date(annee, 11, 1);
 const noel = new Date(annee, 11, 25);
 
 // ===== Stockage des jours ouverts =====
-const cleStockage = `calendrier-avent-${annee}-jours-ouverts`;
+const cleStockage = `calendrier-avent-${codePartage}-jours-ouverts`;
 const joursOuvertsTexte = localStorage.getItem(cleStockage);
 const joursOuverts = joursOuvertsTexte === null ? [] : JSON.parse(joursOuvertsTexte);
 
@@ -58,7 +68,7 @@ function dernierJourOuvrable(dateCalcule) {
 // ===== Fenêtre cadeau =====
 // Renvoie true si un cadeau a été affiché
 async function afficherCadeau(numeroJour) {
-    const reponse = await fetch(`/api/cadeaux/${numeroJour}`);
+    const reponse = await fetch(`/api/calendriers/${codePartage}/cadeaux/${numeroJour}`);
 
     titreFenetre.textContent = `Jour ${numeroJour}`;
     mediaFenetreCadeau.replaceChildren();
