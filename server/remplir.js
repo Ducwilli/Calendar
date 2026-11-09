@@ -1,13 +1,12 @@
-import { db } from "./db.js";
+import { db, genererCode } from "./db.js";
 import { calendrierAvent } from "./donnees.js";
-import { randomBytes } from "node:crypto";
 
 // 1. Vider les tables (les cadeaux d'abord, à cause de la clé étrangère)
 db.exec("DELETE FROM cadeaux;");
 db.exec("DELETE FROM calendriers;");
 
 // 2. Insérer le calendrier et creer son code de partage
-const codePartage = randomBytes(6).toString("base64url");
+const codePartage = genererCode();
 const resultat = db
     .prepare("INSERT INTO calendriers (annee, code_partage) VALUES (?, ?)")
     .run(calendrierAvent.annee, codePartage);

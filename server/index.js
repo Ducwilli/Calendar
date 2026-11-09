@@ -1,8 +1,9 @@
 import express from "express";
 import { resolve } from "node:path";
-import { db } from "./db.js";
+import { db, genererCode } from "./db.js";
 
 const app = express();
+app.use(express.json());
 
 // ===== Requêtes SQL, préparées une seule fois =====
 const lireCalendrier = db.prepare(`
@@ -18,6 +19,16 @@ const lireCadeau = db.prepare(`
            texte_alt AS texteAlt
     FROM cadeaux
     WHERE calendrier_id = ? AND jour = ?
+`);
+
+const insererCalendrier = db.prepare(`
+    INSERT INTO calendriers (annee, code_partage)
+    VALUES (?, ?)
+`);
+
+const insererCadeau = db.prepare(`
+    INSERT INTO cadeaux (calendrier_id, jour, texte)
+    VALUES (?, ?, ?)
 `);
 
 // ===== Simulation de date (null = vraie date) =====
@@ -44,6 +55,61 @@ function dernierJourOuvrable(dateCalcule, annee) {
     } else {
         return numeroDuJour;
     }
+}
+
+// ===== Vérification d'un calendrier envoyé par le navigateur =====
+const anneeMin = 2026;
+const longueurMax = 1000;
+
+function estUnObjet(valeur) {
+    return typeof valeur === "object" && valeur !== null && !Array.isArray(valeur);
+}
+
+// Renvoie { erreur } si quelque chose ne va pas, sinon { annee, cadeaux } nettoyés
+function verifierCalendrier(donnees) {
+    if (!estUnObjet(donnees)) {
+        return { erreur: "Données invalides" };
+    }
+
+    const annee = donnees.annee;
+    if (!Number.isInteger(annee) || annee < anneeMin) {
+        return { erreur: `L'année doit être un nombre entier, au moins ${anneeMin}` };
+    }
+
+    const cadeaux = donnees.cadeaux;
+    if (!Array.isArray(cadeaux) || cadeaux.length < 1 || cadeaux.length > 24) {
+        return { erreur: "Le calendrier doit contenir entre 1 et 24 cadeaux" };
+    }
+
+    const cadeauxNettoyes = [];
+    const joursVus = new Set();
+
+    for (const cadeau of cadeaux) {
+        if (!estUnObjet(cadeau)) {
+            return { erreur: "Un des cadeaux est invalide" };
+        }
+
+        const jour = cadeau.jour;
+        if (!Number.isInteger(jour) || jour < 1 || jour > 24) {
+            return { erreur: "Chaque jour doit être un nombre entier entre 1 et 24" };
+        }
+        if (joursVus.has(jour)) {
+            return { erreur: `Le jour ${jour} apparaît deux fois` };
+        }
+        joursVus.add(jour);
+
+        if (typeof cadeau.texte !== "string") {
+            return { erreur: `Le texte du jour ${jour} est invalide` };
+        }
+        const texte = cadeau.texte.trim();
+        if (texte === "" || texte.length > longueurMax) {
+            return { erreur: `Le texte du jour ${jour} doit contenir entre 1 et ${longueurMax} caractères` };
+        }
+
+        cadeauxNettoyes.push({ jour, texte });
+    }
+
+    return { annee, cadeaux: cadeauxNettoyes };
 }
 
 // ===== Routes de l'API =====
@@ -90,13 +156,42 @@ app.get("/api/calendriers/:code/cadeaux/:jour", (requete, reponse) => {
     reponse.json(cadeau);
 });
 
-// ===== Pages =====
-app.get("/creer", (requete, reponse) => {
-    reponse.sendFile(resolve("public/creer.html"));
+app.post("/api/calendriers", (requete, reponse) => {
+    // 1. Vérifier tout ce qui arrive
+    const resultat = verifierCalendrier(requete.body);
+    if (resultat.erreur) {
+        return reponse.status(400).json({ erreur: resultat.erreur });
+    }
+
+    // 2. Tout enregistrer, ou rien
+    const codePartage = genererCode();
+    db.exec("BEGIN");
+    try {
+        const insertion = insererCalendrier.run(resultat.annee, codePartage);
+        const calendrierId = insertion.lastInsertRowid;
+
+        for (const cadeau of resultat.cadeaux) {
+            insererCadeau.run(calendrierId, cadeau.jour, cadeau.texte);
+        }
+
+        db.exec("COMMIT");
+    } catch (erreur) {
+        db.exec("ROLLBACK");
+        console.error("Échec de la création d'un calendrier :", erreur);
+        return reponse.status(500).json({ erreur: "Impossible de créer le calendrier, réessaie plus tard" });
+    }
+
+    // 3. Renvoyer le code de partage
+    reponse.status(201).json({ codePartage });
 });
 
+// ===== Pages =====
 app.get("/", (requete, reponse) => {
     reponse.sendFile(resolve("public/accueil.html"));
+});
+
+app.get("/creer", (requete, reponse) => {
+    reponse.sendFile(resolve("public/creer.html"));
 });
 
 app.get("/c/:code", (requete, reponse) => {

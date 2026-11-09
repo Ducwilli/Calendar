@@ -29,8 +29,10 @@ for (let jour = 1; jour <= 24; jour++) {
     champsTexte.push(champ);
 }
 
-// ===== Envoi du formulaire =====
-formulaire.addEventListener("submit", (evenement) => {
+/// ===== Envoi du formulaire =====
+const boutonCreer = formulaire.querySelector("button[type='submit']");
+
+formulaire.addEventListener("submit", async (evenement) => {
     evenement.preventDefault();
     messageErreur.textContent = "";
 
@@ -52,6 +54,28 @@ formulaire.addEventListener("submit", (evenement) => {
         cadeaux: cadeaux
     };
 
-    // Pour l'instant : on affiche ce qui serait envoyé au serveur (morceau D)
-    console.log(donnees);
+    boutonCreer.disabled = true;
+    const reponse = await fetch("/api/calendriers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(donnees)
+    });
+    boutonCreer.disabled = false;
+
+    if (!reponse.ok) {
+        const probleme = await reponse.json();
+        messageErreur.textContent = probleme.erreur;
+        return;
+    }
+
+    const { codePartage } = await reponse.json();
+    const adresse = `${location.origin}/c/${codePartage}`;
+
+    const lien = document.createElement("a");
+    lien.href = adresse;
+    lien.textContent = adresse;
+    lienPartage.replaceChildren(lien);
+
+    formulaire.hidden = true;
+    sectionResultat.hidden = false;
 });
