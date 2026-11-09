@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Créer un calendrier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <header>
+        <h1>Créer mon calendrier de l'Avent</h1>
+        <a href="/">Retour à l'accueil</a>
+    </header>
+
+    <main>
+        <form id="formulaire-creation">
+            <label for="annee">Année</label>
+            <input type="number" id="annee" name="annee" min="2026" required />
+
+            <fieldset id="liste-cadeaux">
+                <legend>Les cadeaux</legend>
+            </fieldset>
+
+            <p id="message-erreur" aria-live="polite"></p>
+
+            <button type="submit">Créer mon calendrier</button>
+        </form>
+
+        <section id="resultat" hidden>
+            <h2>Ton calendrier est prêt !</h2>
+            <p id="lien-partage"></p>
+        </section>
+    </main>
+
+    <script type="module" src="/js/creer.js"></script>
+  </body>
+</html>
