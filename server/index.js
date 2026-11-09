@@ -1,6 +1,7 @@
 import express from "express";
 import { resolve } from "node:path";
 import { db, genererCode } from "./db.js";
+import { recevoirMedias, supprimerFichiers, tailleMaxImage } from "./medias.js";
 
 const app = express();
 app.use(express.json());
@@ -27,8 +28,8 @@ const insererCalendrier = db.prepare(`
 `);
 
 const insererCadeau = db.prepare(`
-    INSERT INTO cadeaux (calendrier_id, jour, texte)
-    VALUES (?, ?, ?)
+    INSERT INTO cadeaux (calendrier_id, jour, texte, type_media, lien_media, texte_alt)
+    VALUES (?, ?, ?, ?, ?, ?)
 `);
 
 // ===== Simulation de date (null = vraie date) =====
@@ -60,56 +61,91 @@ function dernierJourOuvrable(dateCalcule, annee) {
 // ===== Vérification d'un calendrier envoyé par le navigateur =====
 const anneeMin = 2026;
 const longueurMax = 1000;
+const longueurMaxAlt = 300;
 
 function estUnObjet(valeur) {
     return typeof valeur === "object" && valeur !== null && !Array.isArray(valeur);
 }
 
+// Lit un champ texte du formulaire : "" s'il est absent, null s'il est invalide
+function lireChamp(champs, nom) {
+    const valeur = champs[nom];
+    if (valeur === undefined) {
+        return "";
+    }
+    if (typeof valeur !== "string") {
+        return null;   // par exemple un champ envoyé deux fois
+    }
+    return valeur.trim();
+}
+
 // Renvoie { erreur } si quelque chose ne va pas, sinon { annee, cadeaux } nettoyés
-function verifierCalendrier(donnees) {
-    if (!estUnObjet(donnees)) {
+function verifierCalendrier(champs, fichiers) {
+    if (!estUnObjet(champs)) {
         return { erreur: "Données invalides" };
     }
 
-    const annee = donnees.annee;
+    const annee = Number(lireChamp(champs, "annee"));
     if (!Number.isInteger(annee) || annee < anneeMin) {
         return { erreur: `L'année doit être un nombre entier, au moins ${anneeMin}` };
     }
 
-    const cadeaux = donnees.cadeaux;
-    if (!Array.isArray(cadeaux) || cadeaux.length < 1 || cadeaux.length > 24) {
-        return { erreur: "Le calendrier doit contenir entre 1 et 24 cadeaux" };
+    const cadeaux = [];
+
+    for (let jour = 1; jour <= 24; jour++) {
+        const texte = lireChamp(champs, `texte-${jour}`);
+        const alt = lireChamp(champs, `alt-${jour}`);
+        if (texte === null || alt === null) {
+            return { erreur: `Les champs du jour ${jour} sont invalides` };
+        }
+
+        const fichier = fichiers?.[`media-${jour}`]?.[0];
+
+        // Jour laissé vide : pas de cadeau
+        if (texte === "" && fichier === undefined) {
+            continue;
+        }
+
+        if (texte.length > longueurMax) {
+            return { erreur: `Le texte du jour ${jour} dépasse ${longueurMax} caractères` };
+        }
+
+        let typeMedia = null;
+        let lienMedia = null;
+        let texteAlt = null;
+
+        if (fichier !== undefined) {
+            typeMedia = fichier.mimetype.startsWith("image/") ? "image" : "video";
+            lienMedia = `/media/${fichier.filename}`;
+
+            if (typeMedia === "image") {
+                if (fichier.size > tailleMaxImage) {
+                    return { erreur: `La photo du jour ${jour} dépasse 5 Mo` };
+                }
+                if (alt === "") {
+                    return { erreur: `Décris la photo du jour ${jour} en quelques mots` };
+                }
+                if (alt.length > longueurMaxAlt) {
+                    return { erreur: `La description de la photo du jour ${jour} dépasse ${longueurMaxAlt} caractères` };
+                }
+                texteAlt = alt;
+            }
+        }
+
+        cadeaux.push({
+            jour,
+            texte: texte === "" ? null : texte,
+            typeMedia,
+            lienMedia,
+            texteAlt
+        });
     }
 
-    const cadeauxNettoyes = [];
-    const joursVus = new Set();
-
-    for (const cadeau of cadeaux) {
-        if (!estUnObjet(cadeau)) {
-            return { erreur: "Un des cadeaux est invalide" };
-        }
-
-        const jour = cadeau.jour;
-        if (!Number.isInteger(jour) || jour < 1 || jour > 24) {
-            return { erreur: "Chaque jour doit être un nombre entier entre 1 et 24" };
-        }
-        if (joursVus.has(jour)) {
-            return { erreur: `Le jour ${jour} apparaît deux fois` };
-        }
-        joursVus.add(jour);
-
-        if (typeof cadeau.texte !== "string") {
-            return { erreur: `Le texte du jour ${jour} est invalide` };
-        }
-        const texte = cadeau.texte.trim();
-        if (texte === "" || texte.length > longueurMax) {
-            return { erreur: `Le texte du jour ${jour} doit contenir entre 1 et ${longueurMax} caractères` };
-        }
-
-        cadeauxNettoyes.push({ jour, texte });
+    if (cadeaux.length === 0) {
+        return { erreur: "Le calendrier doit contenir au moins un cadeau" };
     }
 
-    return { annee, cadeaux: cadeauxNettoyes };
+    return { annee, cadeaux };
 }
 
 // ===== Routes de l'API =====
@@ -156,10 +192,11 @@ app.get("/api/calendriers/:code/cadeaux/:jour", (requete, reponse) => {
     reponse.json(cadeau);
 });
 
-app.post("/api/calendriers", (requete, reponse) => {
-    // 1. Vérifier tout ce qui arrive
-    const resultat = verifierCalendrier(requete.body);
+app.post("/api/calendriers", recevoirMedias, async (requete, reponse) => {
+    // 1. Vérifier tout ce qui arrive (textes et fichiers)
+    const resultat = verifierCalendrier(requete.body, requete.files);
     if (resultat.erreur) {
+        await supprimerFichiers(requete.files);
         return reponse.status(400).json({ erreur: resultat.erreur });
     }
 
@@ -171,12 +208,20 @@ app.post("/api/calendriers", (requete, reponse) => {
         const calendrierId = insertion.lastInsertRowid;
 
         for (const cadeau of resultat.cadeaux) {
-            insererCadeau.run(calendrierId, cadeau.jour, cadeau.texte);
+            insererCadeau.run(
+                calendrierId,
+                cadeau.jour,
+                cadeau.texte,
+                cadeau.typeMedia,
+                cadeau.lienMedia,
+                cadeau.texteAlt
+            );
         }
 
         db.exec("COMMIT");
     } catch (erreur) {
         db.exec("ROLLBACK");
+        await supprimerFichiers(requete.files);
         console.error("Échec de la création d'un calendrier :", erreur);
         return reponse.status(500).json({ erreur: "Impossible de créer le calendrier, réessaie plus tard" });
     }
@@ -203,7 +248,8 @@ app.get("/c/:code", (requete, reponse) => {
     reponse.sendFile(resolve("public/index.html"));
 });
 
-// ===== Fichiers du site =====
+// ===== Fichiers =====
+app.use("/media", express.static("uploads"));
 app.use(express.static("public"));
 
 // ===== Démarrage =====
