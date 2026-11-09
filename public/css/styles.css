@@ -434,6 +434,231 @@ button:focus-visible {
     }
 }
 
+/* =========================================================
+   Pages avec formulaire : accueil et création
+   ========================================================= */
+
+/* Liens sur fond sombre (en-tête) */
+header a {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--menthe);
+    font-weight: 600;
+}
+
+/* Les cartes : formulaires et résultat */
+main > form,
+#resultat {
+    max-width: 640px;
+    margin: 0 auto 1.5rem;
+    padding: 1.5rem 1.25rem;
+    color: var(--vert);
+    background: var(--creme);
+    border-top: 10px solid var(--rouge);
+    border-radius: var(--rayon);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+main > form h2,
+#resultat h2 {
+    margin-top: 1.5rem;
+    color: var(--rouge);
+}
+
+#resultat h2 {
+    margin-top: 0;
+}
+
+main > form p {
+    margin: 0 0 1rem;
+    font-size: 0.95rem;
+    color: var(--vert-moyen);
+}
+
+/* Libellés et champs */
+main > form label {
+    display: block;
+    margin: 1rem 0 0.35rem;
+    font-weight: 700;
+}
+
+main > form label:first-child,
+fieldset legend + label {
+    margin-top: 0;
+}
+
+main > form input[type="text"],
+main > form input[type="number"],
+main > form textarea {
+    display: block;
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    font: inherit;
+    font-size: 1rem; /* 16 px minimum : sinon l'iPhone zoome sur le champ */
+    color: var(--vert);
+    background: #fff;
+    border: 2px solid #ddd0b8;
+    border-radius: 8px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+main > form textarea {
+    resize: vertical;
+    min-height: 3.5rem;
+}
+
+main > form input:focus,
+main > form textarea:focus {
+    outline: none;
+    border-color: var(--moutarde);
+    box-shadow: 0 0 0 4px rgba(244, 182, 63, 0.3);
+}
+
+/* Champ fichier : le bouton du sélecteur prend le style du site */
+main > form input[type="file"] {
+    display: block;
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--vert-moyen);
+}
+
+main > form input[type="file"]::file-selector-button {
+    margin-right: 0.75rem;
+    padding: 0.5rem 1rem;
+    font: inherit;
+    font-weight: 700;
+    color: var(--blanc);
+    background: var(--vert-moyen);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+/* Bouton d'envoi */
+main > form button[type="submit"] {
+    display: block;
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.95rem 1.5rem;
+    font-size: 1.1rem;
+    color: var(--blanc);
+    background: var(--rouge);
+}
+
+main > form button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* Messages d'erreur (vides = invisibles) */
+#paragraphe-erreur,
+#message-erreur {
+    margin: 0.75rem 0 0;
+    padding: 0.6rem 0.8rem;
+    font-weight: 700;
+    color: var(--rouge-fonce);
+    background: #fbe3e0;
+    border-left: 4px solid var(--rouge);
+    border-radius: 4px;
+}
+
+#paragraphe-erreur:empty,
+#message-erreur:empty {
+    display: none;
+}
+
+/* ===== Accueil : le lien « Créer mon calendrier » en grosse tuile ===== */
+main > a[href="/creer"] {
+    display: block;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    text-decoration: none;
+    font-family: var(--f-affiche);
+    font-size: 1.6rem;
+    color: var(--blanc);
+    background-color: var(--vert-moyen);
+    background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 12px, transparent 12px 24px);
+    border-radius: var(--rayon);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+main > a[href="/creer"]:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+/* ===== Création : une carte par jour, couleur tournante ===== */
+#liste-cadeaux {
+    display: grid;
+    gap: 0.9rem;
+}
+
+#liste-cadeaux fieldset {
+    --couleur-jour: var(--rouge);
+    min-width: 0; /* évite que le champ fichier élargisse la carte sur mobile */
+    margin: 0;
+    padding: 1rem;
+    background: #fff;
+    border: none;
+    border-left: 6px solid var(--couleur-jour);
+    border-radius: 8px;
+}
+
+#liste-cadeaux fieldset:nth-child(4n + 2) { --couleur-jour: var(--vert-moyen); }
+#liste-cadeaux fieldset:nth-child(4n + 3) { --couleur-jour: var(--moutarde); }
+#liste-cadeaux fieldset:nth-child(4n + 4) { --couleur-jour: var(--turquoise); }
+
+#liste-cadeaux legend {
+    float: left;          /* place la légende dans la carte, au-dessus des champs */
+    width: 100%;
+    margin-bottom: 0.5rem;
+    padding: 0;
+    font-family: var(--f-affiche);
+    font-size: 1.4rem;
+    color: var(--couleur-jour);
+}
+
+#liste-cadeaux legend + label {
+    clear: both;
+}
+
+#liste-cadeaux label {
+    font-size: 0.9rem;
+}
+
+/* Résultat : le lien à partager */
+#lien-partage a {
+    display: block;
+    padding: 0.8rem;
+    font-weight: 700;
+    color: var(--rouge-fonce);
+    background: #fff;
+    border: 2px dashed var(--moutarde);
+    border-radius: 8px;
+    word-break: break-all;
+}
+
+@media (min-width: 640px) {
+    main > form,
+    #resultat {
+        padding: 2rem;
+    }
+
+    #liste-cadeaux {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    main > form,
+    #resultat,
+    main > a[href="/creer"] {
+        max-width: 760px;
+    }
+}
+
 /* ===== Moins d'animations si l'utilisateur le demande ===== */
 @media (prefers-reduced-motion: reduce) {
     *,
