@@ -22,6 +22,20 @@ const supprimerSessionParJeton = db.prepare(`
     WHERE jeton_hache = ?
 `);
 
+const lireSession = db.prepare(`
+    SELECT sessions.date_expiration AS expiration,
+           utilisateurs.id AS utilisateurId,
+           utilisateurs.mail AS email
+    FROM sessions
+    JOIN utilisateurs ON utilisateurs.id = sessions.utilisateur_id
+    WHERE sessions.jeton_hache = ?
+`);
+
+const supprimerSessionsExpirees = db.prepare(`
+    DELETE FROM sessions
+    WHERE date_expiration < ?
+`);
+
 // Hachage rapide (SHA-256) : suffisant pour un jeton long et aléatoire
 export function hacherJeton(jeton) {
     return createHash("sha256").update(jeton).digest("hex");
@@ -48,4 +62,46 @@ export function poserCookieSession(reponse, jeton) {
 // Demande au navigateur d'effacer le cookie de session
 export function effacerCookieSession(reponse) {
     reponse.clearCookie("session", optionsCookie);
+}
+
+// Middleware : remplit requete.utilisateur ({ id, email }) ou null
+export function identifierUtilisateur(requete, reponse, suivant) {
+    requete.utilisateur = null;
+
+    const jeton = requete.cookies?.session;
+    if (typeof jeton !== "string") {
+        return suivant();
+    }
+
+    const jetonHache = hacherJeton(jeton);
+    const session = lireSession.get(jetonHache);
+
+    // Jeton inconnu (session supprimée, ou cookie inventé) : on efface le cookie
+    if (session === undefined) {
+        effacerCookieSession(reponse);
+        return suivant();
+    }
+
+    // Session expirée : on la supprime et on efface le cookie
+    if (session.expiration < Date.now()) {
+        supprimerSessionParJeton.run(jetonHache);
+        effacerCookieSession(reponse);
+        return suivant();
+    }
+
+    requete.utilisateur = { id: session.utilisateurId, email: session.email };
+    suivant();
+}
+
+// Middleware : bloque les routes réservées aux utilisateurs connectés
+export function exigerConnexion(requete, reponse, suivant) {
+    if (requete.utilisateur === null) {
+        return reponse.status(401).json({ erreur: "Tu dois être connecté" });
+    }
+    suivant();
+}
+
+// Supprime de la base toutes les sessions expirées
+export function nettoyerSessionsExpirees() {
+    supprimerSessionsExpirees.run(Date.now());
 }

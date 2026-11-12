@@ -4,11 +4,20 @@ import { resolve } from "node:path";
 import { db, genererCode } from "./db.js";
 import { recevoirMedias, supprimerFichiers, tailleMaxImage } from "./medias.js";
 import { hacherMotDePasse, verifierMotDePasse } from "./motsDePasse.js";
-import { creerSession, supprimerSession, poserCookieSession, effacerCookieSession } from "./sessions.js";
+import {
+    creerSession,
+    supprimerSession,
+    poserCookieSession,
+    effacerCookieSession,
+    identifierUtilisateur,
+    exigerConnexion,
+    nettoyerSessionsExpirees
+} from "./sessions.js";
 
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(identifierUtilisateur);
 
 // ===== Requêtes SQL, préparées une seule fois =====
 const lireCalendrier = db.prepare(`
@@ -368,6 +377,10 @@ app.post("/api/deconnexion", (requete, reponse) => {
     reponse.status(204).end();
 });
 
+app.get("/api/moi", exigerConnexion, (requete, reponse) => {
+    reponse.json({ email: requete.utilisateur.email });
+});
+
 // ===== Pages =====
 app.get("/", (requete, reponse) => {
     reponse.sendFile(resolve("public/accueil.html"));
@@ -397,6 +410,10 @@ app.get("/connexion", (requete, reponse) => {
 // ===== Fichiers =====
 app.use("/media", express.static("uploads"));
 app.use(express.static("public"));
+
+// ===== Nettoyage des sessions expirées : au démarrage, puis une fois par jour =====
+nettoyerSessionsExpirees();
+setInterval(nettoyerSessionsExpirees, unJour);
 
 // ===== Démarrage =====
 app.listen(3000, () => {
