@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Se connecter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <header>
+        <h1>Se connecter</h1>
+        <a href="/">Retour à l'accueil</a>
+    </header>
+
+    <main>
+        <form id="formulaire-connexion">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="email" maxlength="254" required />
+
+            <label for="mot-de-passe">Mot de passe</label>
+            <input type="password" id="mot-de-passe" autocomplete="current-password" maxlength="200" required />
+
+            <p id="message-erreur" aria-live="polite"></p>
+
+            <button type="submit">Se connecter</button>
+
+            <p>Pas encore de compte ? <a href="/inscription">Créer un compte</a></p>
+        </form>
+    </main>
+
+    <script type="module" src="/js/connexion.js"></script>
+  </body>
+</html>

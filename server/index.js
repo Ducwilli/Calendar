@@ -1,12 +1,14 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import { resolve } from "node:path";
 import { db, genererCode } from "./db.js";
 import { recevoirMedias, supprimerFichiers, tailleMaxImage } from "./medias.js";
-import { hacherMotDePasse } from "./motsDePasse.js";
-import { creerSession, poserCookieSession } from "./sessions.js";
+import { hacherMotDePasse, verifierMotDePasse } from "./motsDePasse.js";
+import { creerSession, supprimerSession, poserCookieSession, effacerCookieSession } from "./sessions.js";
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // ===== Requêtes SQL, préparées une seule fois =====
 const lireCalendrier = db.prepare(`
@@ -37,6 +39,14 @@ const insererCadeau = db.prepare(`
 const insererUtilisateur = db.prepare(`
     INSERT INTO utilisateurs (mail, mot_de_passe_hache, sel)
     VALUES (?, ?, ?)
+`);
+
+const lireUtilisateurParEmail = db.prepare(`
+    SELECT id,
+           mot_de_passe_hache AS empreinte,
+           sel
+    FROM utilisateurs
+    WHERE mail = ?
 `);
 
 // ===== Simulation de date (null = vraie date) =====
@@ -188,6 +198,29 @@ function verifierInscription(donnees) {
     return { email, motDePasse };
 }
 
+// ===== Vérification d'une connexion =====
+// Empreinte factice : utilisée quand l'email est inconnu, pour que la réponse
+// prenne le même temps que pour un email connu
+const empreinteFactice = await hacherMotDePasse("mot-de-passe-factice-pour-egaliser-le-temps");
+
+// Renvoie { email, motDePasse } nettoyés, ou null si la forme est invalide
+function lireIdentifiants(donnees) {
+    if (!estUnObjet(donnees)) {
+        return null;
+    }
+    if (typeof donnees.email !== "string" || typeof donnees.motDePasse !== "string") {
+        return null;
+    }
+
+    const email = donnees.email.trim().toLowerCase();
+    const motDePasse = donnees.motDePasse;
+    if (email.length > longueurMaxEmail || motDePasse.length > longueurMaxMotDePasse) {
+        return null;
+    }
+
+    return { email, motDePasse };
+}
+
 // ===== Routes de l'API : calendriers =====
 app.get("/api/statut", (requete, reponse) => {
     reponse.json({ statut: "ok" });
@@ -300,6 +333,41 @@ app.post("/api/inscription", async (requete, reponse) => {
     reponse.status(201).json({ email: resultat.email });
 });
 
+app.post("/api/connexion", async (requete, reponse) => {
+    // 1. Vérifier la forme
+    const identifiants = lireIdentifiants(requete.body);
+    if (identifiants === null) {
+        return reponse.status(400).json({ erreur: "L'email et le mot de passe sont obligatoires" });
+    }
+
+    // 2. Retrouver l'utilisateur, et vérifier le mot de passe dans tous les cas
+    const utilisateur = lireUtilisateurParEmail.get(identifiants.email);
+    const sel = utilisateur?.sel ?? empreinteFactice.sel;
+    const empreinte = utilisateur?.empreinte ?? empreinteFactice.empreinte;
+    const motDePasseCorrect = await verifierMotDePasse(identifiants.motDePasse, sel, empreinte);
+
+    // 3. Même réponse pour un email inconnu et un mauvais mot de passe
+    if (utilisateur === undefined || !motDePasseCorrect) {
+        return reponse.status(401).json({ erreur: "Email ou mot de passe incorrect" });
+    }
+
+    // 4. Ouvrir la session
+    const jeton = creerSession(utilisateur.id);
+    poserCookieSession(reponse, jeton);
+
+    reponse.json({ email: identifiants.email });
+});
+
+app.post("/api/deconnexion", (requete, reponse) => {
+    const jeton = requete.cookies.session;
+    if (typeof jeton === "string") {
+        supprimerSession(jeton);
+    }
+
+    effacerCookieSession(reponse);
+    reponse.status(204).end();
+});
+
 // ===== Pages =====
 app.get("/", (requete, reponse) => {
     reponse.sendFile(resolve("public/accueil.html"));
@@ -320,6 +388,10 @@ app.get("/c/:code", (requete, reponse) => {
     }
 
     reponse.sendFile(resolve("public/index.html"));
+});
+
+app.get("/connexion", (requete, reponse) => {
+    reponse.sendFile(resolve("public/connexion.html"));
 });
 
 // ===== Fichiers =====
