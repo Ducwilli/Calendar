@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Créer un compte</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <header>
+        <h1>Créer un compte</h1>
+        <a href="/">Retour à l'accueil</a>
+    </header>
+
+    <main>
+        <form id="formulaire-inscription">
+            <label for="email">Email</label>
+            <input type="email" id="email" autocomplete="email" maxlength="254" required />
+
+            <label for="mot-de-passe">Mot de passe (10 caractères minimum)</label>
+            <input type="password" id="mot-de-passe" autocomplete="new-password" minlength="10" maxlength="200" required />
+
+            <label for="confirmation">Confirme le mot de passe</label>
+            <input type="password" id="confirmation" autocomplete="new-password" minlength="10" maxlength="200" required />
+
+            <p id="message-erreur" aria-live="polite"></p>
+
+            <button type="submit">Créer mon compte</button>
+        </form>
+    </main>
+
+    <script type="module" src="/js/inscription.js"></script>
+  </body>
+</html>

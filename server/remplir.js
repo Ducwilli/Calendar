@@ -2,7 +2,7 @@ import { db, genererCode } from "./db.js";
 import { hacherMotDePasse } from "./motsDePasse.js";
 import { calendrierAvent } from "./donnees.js";
 
-const emailTest = "test@exemple.fr";
+const emailTest = "admin@gmail.fr";
 const motDePasseTest = "calendrier-test-2026";
 
 // 1. Vider la base : les cascades suppriment calendriers, cadeaux et sessions

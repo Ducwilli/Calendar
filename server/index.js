@@ -2,6 +2,8 @@ import express from "express";
 import { resolve } from "node:path";
 import { db, genererCode } from "./db.js";
 import { recevoirMedias, supprimerFichiers, tailleMaxImage } from "./medias.js";
+import { hacherMotDePasse } from "./motsDePasse.js";
+import { creerSession, poserCookieSession } from "./sessions.js";
 
 const app = express();
 app.use(express.json());
@@ -32,6 +34,11 @@ const insererCadeau = db.prepare(`
     VALUES (?, ?, ?, ?, ?, ?)
 `);
 
+const insererUtilisateur = db.prepare(`
+    INSERT INTO utilisateurs (mail, mot_de_passe_hache, sel)
+    VALUES (?, ?, ?)
+`);
+
 // ===== Simulation de date (null = vraie date) =====
 // Exemple de test : new Date(2026, 11, 7, 10, 0) pour le 7 décembre 2026 à 10 h
 const dateSimulee = null;
@@ -58,11 +65,7 @@ function dernierJourOuvrable(dateCalcule, annee) {
     }
 }
 
-// ===== Vérification d'un calendrier envoyé par le navigateur =====
-const anneeMin = 2026;
-const longueurMax = 1000;
-const longueurMaxAlt = 300;
-
+// ===== Outils de vérification =====
 function estUnObjet(valeur) {
     return typeof valeur === "object" && valeur !== null && !Array.isArray(valeur);
 }
@@ -78,6 +81,11 @@ function lireChamp(champs, nom) {
     }
     return valeur.trim();
 }
+
+// ===== Vérification d'un calendrier envoyé par le navigateur =====
+const anneeMin = 2026;
+const longueurMax = 1000;
+const longueurMaxAlt = 300;
 
 // Renvoie { erreur } si quelque chose ne va pas, sinon { annee, cadeaux } nettoyés
 function verifierCalendrier(champs, fichiers) {
@@ -148,7 +156,39 @@ function verifierCalendrier(champs, fichiers) {
     return { annee, cadeaux };
 }
 
-// ===== Routes de l'API =====
+// ===== Vérification d'une inscription =====
+const longueurMaxEmail = 254;
+const longueurMinMotDePasse = 10;
+const longueurMaxMotDePasse = 200;
+const formatEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Renvoie { erreur } si quelque chose ne va pas, sinon { email, motDePasse } nettoyés
+function verifierInscription(donnees) {
+    if (!estUnObjet(donnees)) {
+        return { erreur: "Données invalides" };
+    }
+
+    if (typeof donnees.email !== "string") {
+        return { erreur: "L'email est obligatoire" };
+    }
+    const email = donnees.email.trim().toLowerCase();
+    if (email.length > longueurMaxEmail || !formatEmail.test(email)) {
+        return { erreur: "Cet email n'est pas valide" };
+    }
+
+    // Pas de trim : les espaces font partie du mot de passe
+    const motDePasse = donnees.motDePasse;
+    if (typeof motDePasse !== "string") {
+        return { erreur: "Le mot de passe est obligatoire" };
+    }
+    if (motDePasse.length < longueurMinMotDePasse || motDePasse.length > longueurMaxMotDePasse) {
+        return { erreur: `Le mot de passe doit contenir entre ${longueurMinMotDePasse} et ${longueurMaxMotDePasse} caractères` };
+    }
+
+    return { email, motDePasse };
+}
+
+// ===== Routes de l'API : calendriers =====
 app.get("/api/statut", (requete, reponse) => {
     reponse.json({ statut: "ok" });
 });
@@ -230,6 +270,36 @@ app.post("/api/calendriers", recevoirMedias, async (requete, reponse) => {
     reponse.status(201).json({ codePartage });
 });
 
+// ===== Routes de l'API : comptes =====
+app.post("/api/inscription", async (requete, reponse) => {
+    // 1. Vérifier l'email et le mot de passe
+    const resultat = verifierInscription(requete.body);
+    if (resultat.erreur) {
+        return reponse.status(400).json({ erreur: resultat.erreur });
+    }
+
+    // 2. Créer le compte (le mot de passe n'est jamais stocké)
+    const { sel, empreinte } = await hacherMotDePasse(resultat.motDePasse);
+
+    let utilisateurId;
+    try {
+        const insertion = insererUtilisateur.run(resultat.email, empreinte, sel);
+        utilisateurId = insertion.lastInsertRowid;
+    } catch (erreur) {
+        if (String(erreur.message).includes("UNIQUE")) {
+            return reponse.status(409).json({ erreur: "Un compte existe déjà avec cet email" });
+        }
+        console.error("Échec de l'inscription :", erreur);
+        return reponse.status(500).json({ erreur: "Impossible de créer le compte, réessaie plus tard" });
+    }
+
+    // 3. Connecter directement le nouvel utilisateur
+    const jeton = creerSession(utilisateurId);
+    poserCookieSession(reponse, jeton);
+
+    reponse.status(201).json({ email: resultat.email });
+});
+
 // ===== Pages =====
 app.get("/", (requete, reponse) => {
     reponse.sendFile(resolve("public/accueil.html"));
@@ -237,6 +307,10 @@ app.get("/", (requete, reponse) => {
 
 app.get("/creer", (requete, reponse) => {
     reponse.sendFile(resolve("public/creer.html"));
+});
+
+app.get("/inscription", (requete, reponse) => {
+    reponse.sendFile(resolve("public/inscription.html"));
 });
 
 app.get("/c/:code", (requete, reponse) => {
