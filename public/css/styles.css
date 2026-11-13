@@ -1,37 +1,41 @@
 /* =========================================================
    Calendrier de l'Avent — styles.css
-   Style mosaïque : cases de tailles et couleurs variées,
-   chiffres géants dans des polices différentes.
-   Mobile d'abord (4 colonnes), ordinateur ensuite (8 colonnes).
+   Style : sombre et élégant (inspiré d'Apple, Instagram, X),
+   tons poudrés rose, rouge et violet,
+   village de pain d'épices la nuit, sur deux plans, avec neige.
+   Mobile d'abord, puis grands écrans en bas de chaque partie.
    ========================================================= */
 
-@import url("https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bebas+Neue&family=Fredoka:wght@600&family=Playfair+Display:ital,wght@1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap");
 
-/* ===== Couleurs, polices, réglages ===== */
+/* ===== Couleurs, police, réglages ===== */
 :root {
-    --rouge: #e63b2e;
-    --rouge-fonce: #b8231c;
-    --vert: #0f3d3a;
-    --vert-moyen: #1e6b62;
-    --turquoise: #6ccfc0;
-    --menthe: #b6f5e8;
-    --moutarde: #f4b63f;
-    --ocre: #cf9440;
-    --creme: #f7efe1;
-    --blanc: #fffaf2;
-    --nuit: #081d1b;            /* fond de la page, plus sombre que les cases vertes */
+    /* Fonds sombres */
+    --fond: #131116;
+    --surface: #1c1a20;
+    --surface-2: #26232b;
+    --bord: rgba(255, 255, 255, 0.08);
 
-    --police-texte: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --f-affiche: "Abril Fatface", Georgia, serif;
-    --f-etroite: "Bebas Neue", "Arial Narrow", sans-serif;
-    --f-ronde: "Fredoka", "Arial Rounded MT Bold", sans-serif;
-    --f-italique: "Playfair Display", Georgia, serif;
+    /* Texte */
+    --texte: #f3eff4;
+    --texte-doux: #a59dab;
+    --texte-pale: #6f6875;
 
-    --ecart: 0.5rem;
+    /* Palette poudrée */
+    --rose: #e3a6b6;
+    --rouge: #c98088;
+    --prune: #b49ac8;
+
+    --police: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+
+    --ecart: 0.6rem;
     --marge: 1rem;
-    --rayon: 4px;
-    /* côté d'une case 1x1 : (largeur utile - écarts) / 4 colonnes */
-    --unite: calc((100vw - 2 * var(--marge) - 3 * var(--ecart)) / 4);
+    --rayon: 18px;        /* coins des cadeaux */
+    --rayon-carte: 22px;  /* coins des cartes */
+    --ombre: 0 20px 50px rgba(0, 0, 0, 0.45);
+
+    /* Côté d'une case 1x1 du calendrier : (largeur utile - écarts) / 6 colonnes */
+    --unite: calc((100vw - 2 * var(--marge) - 5 * var(--ecart)) / 6);
 }
 
 /* ===== Réinitialisation ===== */
@@ -46,38 +50,149 @@
     display: none !important;
 }
 
-body {
-    margin: 0;
-    min-height: 100vh;
-    padding: 1.5rem var(--marge) 3rem;
-    font-family: var(--police-texte);
-    line-height: 1.5;
-    color: var(--blanc);
-    background-color: var(--nuit);
-    background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1.5px, transparent 1.5px);
-    background-size: 22px 22px;
+/* Texte lu par les lecteurs d'écran mais invisible à l'écran */
+.cache {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
-/* ===== En-tête ===== */
+/* =========================================================
+   Le décor : ciel de nuit, village sur deux plans, neige
+   ========================================================= */
+html {
+    min-height: 100%;
+    color-scheme: dark;
+    background-color: var(--fond);
+    background-image:
+        /* une lueur prune très discrète en haut */
+        radial-gradient(120% 55% at 50% 0%, rgba(180, 154, 200, 0.14), transparent 70%),
+        linear-gradient(180deg, #131116 0%, #18151c 60%, #211b25 100%);
+    background-attachment: fixed;
+}
+
+/* Arrière-plan : collines et maisons lointaines, un peu floues */
+html::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 5vh;
+    /* assez haut pour que rien ne soit coupé, même sur un écran très large */
+    height: max(min(44vh, 420px), 30vw);
+    min-height: 220px;
+    z-index: -3;
+    pointer-events: none;
+    opacity: 0.9;
+    filter: blur(1px);
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 320' preserveAspectRatio='xMidYMax slice'%3E%3Cpath d='M0 200 Q250 150 520 185 T1050 170 T1600 180 V320 H0Z' fill='%231f1a24'/%3E%3Cpath d='M0 240 Q300 205 640 232 T1240 222 T1600 228 V320 H0Z' fill='%232a2330'/%3E%3Crect x='30' y='207' width='42' height='48' rx='3' fill='%233a3040'/%3E%3Cpath d='M25 209 L51.0 189 L77 209Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='43' y='216' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.8'/%3E%3Cpath d='M131 238 L145 202 L159 238Z' fill='%23263430'/%3E%3Cpath d='M226 238 L240 189 L254 238Z' fill='%23263430'/%3E%3Crect x='315' y='208' width='37' height='49' rx='3' fill='%233a3040'/%3E%3Cpath d='M310 210 L333.5 190 L357 210Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='326' y='217' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.8'/%3E%3Crect x='410' y='205' width='47' height='48' rx='3' fill='%233a3040'/%3E%3Cpath d='M405 207 L433.5 187 L462 207Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='424' y='214' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.55'/%3E%3Cpath d='M511 238 L525 188 L539 238Z' fill='%23263430'/%3E%3Crect x='600' y='205' width='34' height='47' rx='3' fill='%233a3040'/%3E%3Cpath d='M595 207 L617.0 187 L639 207Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='610' y='214' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.55'/%3E%3Crect x='695' y='207' width='34' height='50' rx='3' fill='%233a3040'/%3E%3Cpath d='M690 209 L712.0 189 L734 209Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='705' y='216' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.8'/%3E%3Cpath d='M796 238 L810 191 L824 238Z' fill='%23263430'/%3E%3Crect x='885' y='199' width='46' height='53' rx='3' fill='%233a3040'/%3E%3Cpath d='M880 201 L908.0 181 L936 201Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='899' y='208' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.8'/%3E%3Crect x='980' y='200' width='36' height='53' rx='3' fill='%233a3040'/%3E%3Cpath d='M975 202 L998.0 182 L1021 202Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='991' y='209' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.8'/%3E%3Cpath d='M1081 238 L1095 191 L1109 238Z' fill='%23263430'/%3E%3Cpath d='M1176 238 L1190 195 L1204 238Z' fill='%23263430'/%3E%3Crect x='1265' y='207' width='47' height='52' rx='3' fill='%233a3040'/%3E%3Cpath d='M1260 209 L1288.5 189 L1317 209Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='1279' y='216' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.8'/%3E%3Crect x='1360' y='206' width='40' height='49' rx='3' fill='%233a3040'/%3E%3Cpath d='M1355 208 L1380.0 188 L1405 208Z' fill='%23d3cbd9' opacity='0.55'/%3E%3Crect x='1372' y='215' width='7' height='7' rx='1.5' fill='%23ffc98a' opacity='0.55'/%3E%3Cpath d='M1461 238 L1475 185 L1489 238Z' fill='%23263430'/%3E%3Cpath d='M1556 238 L1570 199 L1584 238Z' fill='%23263430'/%3E%3C/svg%3E") bottom center / cover no-repeat;
+}
+
+body {
+    position: relative;
+    margin: 0;
+    min-height: 100vh;
+    padding: 0 var(--marge) max(36vh, 26vw);
+    font-family: var(--police);
+    line-height: 1.5;
+    color: var(--texte);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Premier plan : maisons, sapins, guirlandes, fumée des cheminées */
+body::before {
+    content: "";
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* l'image du village fait 1600 x 390 : avec une hauteur d'au moins 390/1600 = 24,4 % de la largeur,
+       elle n'est jamais coupée en haut (seulement sur les côtés, sur téléphone) */
+    height: max(min(32vh, 300px), 24.4vw);
+    min-height: 170px;
+    z-index: -2;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -70 1600 390' preserveAspectRatio='xMidYMax slice'%3E%3Cstyle%3E.f%7Btransform-box:fill-box;transform-origin:center;opacity:0;animation:fum 7s ease-out infinite%7D%40keyframes fum%7B0%25%7Btransform:translate(0,0) scale(.5);opacity:0%7D15%25%7Bopacity:.45%7D100%25%7Btransform:translate(18px,-70px) scale(1.9);opacity:0%7D%7D%40media (prefers-reduced-motion:reduce)%7B.f%7Banimation:none%7D%7D%3C/style%3E%3Crect x='265' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M228.2 266.0 L270 211.0 L311.8 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M255.4 230.8 L270 211.0 L284.6 230.8Z' fill='%23e6e0ea'/%3E%3Cpath d='M241 253 Q270 264 299 248' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='255.4' cy='256.7' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='255.4' cy='256.7' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='270.0' cy='257.2' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='270.0' cy='257.2' r='3' fill='%23c98088'/%3E%3Ccircle cx='284.6' cy='254.4' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='284.6' cy='254.4' r='3' fill='%23b49ac8'/%3E%3Cpath d='M236.6 235.2 L270 180.2 L303.4 235.2Z' fill='%232f4a43'/%3E%3Cpath d='M258.3 200.0 L270 180.2 L281.7 200.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M247 222 Q270 233 293 218' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='258.3' cy='225.8' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='258.3' cy='225.8' r='3' fill='%23c98088'/%3E%3Ccircle cx='270.0' cy='226.4' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='270.0' cy='226.4' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='281.7' cy='223.6' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='281.7' cy='223.6' r='3' fill='%23ffd9a0'/%3E%3Cpath d='M244.9 208.8 L270 153.8 L295.1 208.8Z' fill='%232f4a43'/%3E%3Cpath d='M261.2 173.6 L270 153.8 L278.8 173.6Z' fill='%23e6e0ea'/%3E%3Cpath d='M252 196 Q270 207 288 191' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='261.2' cy='199.4' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='261.2' cy='199.4' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='270.0' cy='200.0' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='270.0' cy='200.0' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='278.8' cy='197.3' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='278.8' cy='197.3' r='3' fill='%23e3a6b6'/%3E%3Crect x='575' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M530.6 266.0 L580 201.0 L629.4 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M562.7 224.4 L580 201.0 L597.3 224.4Z' fill='%23e6e0ea'/%3E%3Cpath d='M545 250 Q580 263 615 245' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='562.7' cy='254.9' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='562.7' cy='254.9' r='3' fill='%23c98088'/%3E%3Ccircle cx='580.0' cy='255.6' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='580.0' cy='255.6' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='597.3' cy='252.3' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='597.3' cy='252.3' r='3' fill='%23ffd9a0'/%3E%3Cpath d='M540.5 229.6 L580 164.6 L619.5 229.6Z' fill='%232f4a43'/%3E%3Cpath d='M566.2 188.0 L580 164.6 L593.8 188.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M552 214 Q580 227 608 209' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='566.2' cy='218.6' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='566.2' cy='218.6' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='580.0' cy='219.2' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='580.0' cy='219.2' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='593.8' cy='215.9' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='593.8' cy='215.9' r='3' fill='%23e3a6b6'/%3E%3Cpath d='M550.4 198.4 L580 133.4 L609.6 198.4Z' fill='%232f4a43'/%3E%3Cpath d='M569.6 156.8 L580 133.4 L590.4 156.8Z' fill='%23e6e0ea'/%3E%3Cpath d='M559 183 Q580 196 601 178' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='569.6' cy='187.3' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='569.6' cy='187.3' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='580.0' cy='188.0' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='580.0' cy='188.0' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='590.4' cy='184.7' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='590.4' cy='184.7' r='3' fill='%23c98088'/%3E%3Crect x='855' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M814.4 266.0 L860 206.0 L905.6 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M844.0 227.6 L860 206.0 L876.0 227.6Z' fill='%23e6e0ea'/%3E%3Cpath d='M828 252 Q860 264 892 247' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='844.0' cy='255.8' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='844.0' cy='255.8' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='860.0' cy='256.4' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='860.0' cy='256.4' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='876.0' cy='253.4' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='876.0' cy='253.4' r='3' fill='%23e3a6b6'/%3E%3Cpath d='M823.5 232.4 L860 172.4 L896.5 232.4Z' fill='%232f4a43'/%3E%3Cpath d='M847.2 194.0 L860 172.4 L872.8 194.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M834 218 Q860 230 886 213' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='847.2' cy='222.2' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='847.2' cy='222.2' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='860.0' cy='222.8' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='860.0' cy='222.8' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='872.8' cy='219.8' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='872.8' cy='219.8' r='3' fill='%23c98088'/%3E%3Cpath d='M832.6 203.6 L860 143.6 L887.4 203.6Z' fill='%232f4a43'/%3E%3Cpath d='M850.4 165.2 L860 143.6 L869.6 165.2Z' fill='%23e6e0ea'/%3E%3Cpath d='M841 189 Q860 201 879 184' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='850.4' cy='193.4' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='850.4' cy='193.4' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='860.0' cy='194.0' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='860.0' cy='194.0' r='3' fill='%23c98088'/%3E%3Ccircle cx='869.6' cy='191.0' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='869.6' cy='191.0' r='3' fill='%23b49ac8'/%3E%3Crect x='907' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M881.6 266.0 L912 226.0 L942.4 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M901.4 240.4 L912 226.0 L922.6 240.4Z' fill='%23e6e0ea'/%3E%3Cpath d='M887.7 243.6 L912 203.6 L936.3 243.6Z' fill='%232f4a43'/%3E%3Cpath d='M903.5 218.0 L912 203.6 L920.5 218.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M893.8 224.4 L912 184.4 L930.2 224.4Z' fill='%232f4a43'/%3E%3Cpath d='M905.6 198.8 L912 184.4 L918.4 198.8Z' fill='%23e6e0ea'/%3E%3Crect x='1215' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M1172.5 266.0 L1220 203.5 L1267.5 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M1203.4 226.0 L1220 203.5 L1236.6 226.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M1187 251 Q1220 264 1253 246' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1203.4' cy='255.4' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='1203.4' cy='255.4' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='1220.0' cy='256.0' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1220.0' cy='256.0' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='1236.6' cy='252.9' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1236.6' cy='252.9' r='3' fill='%23c98088'/%3E%3Cpath d='M1182.0 231.0 L1220 168.5 L1258.0 231.0Z' fill='%232f4a43'/%3E%3Cpath d='M1206.7 191.0 L1220 168.5 L1233.3 191.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M1193 216 Q1220 228 1247 211' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1206.7' cy='220.4' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1206.7' cy='220.4' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='1220.0' cy='221.0' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1220.0' cy='221.0' r='3' fill='%23c98088'/%3E%3Ccircle cx='1233.3' cy='217.9' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1233.3' cy='217.9' r='3' fill='%23b49ac8'/%3E%3Cpath d='M1191.5 201.0 L1220 138.5 L1248.5 201.0Z' fill='%232f4a43'/%3E%3Cpath d='M1210.0 161.0 L1220 138.5 L1230.0 161.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M1200 186 Q1220 198 1240 181' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1210.0' cy='190.4' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1210.0' cy='190.4' r='3' fill='%23c98088'/%3E%3Ccircle cx='1220.0' cy='191.0' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1220.0' cy='191.0' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='1230.0' cy='187.9' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='1230.0' cy='187.9' r='3' fill='%23ffd9a0'/%3E%3Crect x='1495' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M1460.1 266.0 L1500 213.5 L1539.9 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M1486.0 232.4 L1500 213.5 L1514.0 232.4Z' fill='%23e6e0ea'/%3E%3Cpath d='M1472 253 Q1500 264 1528 249' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1486.0' cy='257.1' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1486.0' cy='257.1' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='1500.0' cy='257.6' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1500.0' cy='257.6' r='3' fill='%23c98088'/%3E%3Ccircle cx='1514.0' cy='255.0' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1514.0' cy='255.0' r='3' fill='%23b49ac8'/%3E%3Cpath d='M1468.1 236.6 L1500 184.1 L1531.9 236.6Z' fill='%232f4a43'/%3E%3Cpath d='M1488.8 203.0 L1500 184.1 L1511.2 203.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M1478 224 Q1500 234 1522 220' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1488.8' cy='227.7' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1488.8' cy='227.7' r='3' fill='%23c98088'/%3E%3Ccircle cx='1500.0' cy='228.2' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1500.0' cy='228.2' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='1511.2' cy='225.6' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='1511.2' cy='225.6' r='3' fill='%23ffd9a0'/%3E%3Cpath d='M1476.1 211.4 L1500 158.9 L1523.9 211.4Z' fill='%232f4a43'/%3E%3Cpath d='M1491.6 177.8 L1500 158.9 L1508.4 177.8Z' fill='%23e6e0ea'/%3E%3Cpath d='M1483 199 Q1500 209 1517 195' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1491.6' cy='202.5' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1491.6' cy='202.5' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='1500.0' cy='203.0' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='1500.0' cy='203.0' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='1508.4' cy='200.4' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1508.4' cy='200.4' r='3' fill='%23e3a6b6'/%3E%3Crect x='25' y='262' width='10' height='18' fill='%234a3329'/%3E%3Cpath d='M-4.2 266.0 L30 221.0 L64.2 266.0Z' fill='%232f4a43'/%3E%3Cpath d='M18.0 237.2 L30 221.0 L42.0 237.2Z' fill='%23e6e0ea'/%3E%3Cpath d='M2.6 240.8 L30 195.8 L57.4 240.8Z' fill='%232f4a43'/%3E%3Cpath d='M20.4 212.0 L30 195.8 L39.6 212.0Z' fill='%23e6e0ea'/%3E%3Cpath d='M9.5 219.2 L30 174.2 L50.5 219.2Z' fill='%232f4a43'/%3E%3Cpath d='M22.8 190.4 L30 174.2 L37.2 190.4Z' fill='%23e6e0ea'/%3E%3Crect x='181.8' y='106.6' width='18' height='44' fill='%237a4c3a'/%3E%3Crect x='178.8' y='102.6' width='24' height='8' rx='4' fill='%23eee8f1'/%3E%3Ccircle class='f' style='animation-delay:0.0s' cx='190.8' cy='96.6' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:2.3s' cx='190.8' cy='96.6' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:4.6s' cx='190.8' cy='96.6' r='8' fill='%23cfc6d6'/%3E%3Crect x='90' y='178' width='140' height='100' rx='8' fill='%239a6a4f'/%3E%3Cpath d='M74 184 L160.0 108 L246 184Z' fill='%236c4434' stroke='%23eee8f1' stroke-width='10' stroke-linejoin='round'/%3E%3Ccircle cx='84.0' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='97.8' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='111.6' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='125.5' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='139.3' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='153.1' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='166.9' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='180.7' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='194.5' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='208.4' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='222.2' cy='186' r='6' fill='%23eee8f1'/%3E%3Ccircle cx='236.0' cy='186' r='6' fill='%23eee8f1'/%3E%3Crect x='102.0' y='212.0' width='40.0' height='40.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='108.0' y='218.0' width='28.0' height='28.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M122.0 218.0 v28.0 M108.0 232.0 h28.0' stroke='%239a6a4f' stroke-width='3'/%3E%3Crect x='178.0' y='212.0' width='40.0' height='40.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='184.0' y='218.0' width='28.0' height='28.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M198.0 218.0 v28.0 M184.0 232.0 h28.0' stroke='%239a6a4f' stroke-width='3'/%3E%3Cpath d='M144.0 278 V250.0 a16.0 16.0 0 0 1 32.0 0 V278Z' fill='%23b98292'/%3E%3Ccircle cx='168.0' cy='259.5' r='2.5' fill='%23ffd8a3'/%3E%3Cpath d='M86 194 Q160 214 234 194' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='107.1' cy='198.9' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='107.1' cy='198.9' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='128.3' cy='202.2' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='128.3' cy='202.2' r='3' fill='%23c98088'/%3E%3Ccircle cx='149.4' cy='203.8' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='149.4' cy='203.8' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='170.6' cy='203.8' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='170.6' cy='203.8' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='191.7' cy='202.2' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='191.7' cy='202.2' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='212.9' cy='198.9' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='212.9' cy='198.9' r='3' fill='%23c98088'/%3E%3Crect x='403.5' y='56.0' width='18' height='44' fill='%236a4030'/%3E%3Crect x='400.5' y='52.0' width='24' height='8' rx='4' fill='%23eee8f1'/%3E%3Ccircle class='f' style='animation-delay:1.3s' cx='412.5' cy='46.0' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:3.6s' cx='412.5' cy='46.0' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:5.9s' cx='412.5' cy='46.0' r='8' fill='%23cfc6d6'/%3E%3Crect x='380' y='128' width='130' height='150' rx='8' fill='%2387573f'/%3E%3Cpath d='M366 134 L445.0 48 L524 134Z' fill='%234f3128' stroke='%23eee8f1' stroke-width='10' stroke-linejoin='round'/%3E%3Crect x='426.0' y='78.0' width='38.0' height='38.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Ccircle cx='445.0' cy='97.0' r='13.0' fill='%23ffd8a3' stroke='%23eee8f1' stroke-width='3'/%3E%3Cpath d='M445.0 84.0 v26.0 M432.0 97.0 h26.0' stroke='%2387573f' stroke-width='2.5'/%3E%3Crect x='380' y='198' width='130' height='8' fill='%23eee8f1' rx='4'/%3E%3Cpolyline points='384.0 138 396.0 145 408.0 138 420.0 145 432.0 138 444.0 145 456.0 138 468.0 145 480.0 138 492.0 145 504.0 138' fill='none' stroke='%23eee8f1' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3Crect x='394.0' y='146.0' width='36.0' height='48.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Cpath d='M400.0 188.0 V164.0 a12.0 12.0 0 0 1 24.0 0 V188.0Z' fill='%23ffd8a3'/%3E%3Cpath d='M412.0 152.0 v36.0' stroke='%2387573f' stroke-width='3'/%3E%3Crect x='460.0' y='146.0' width='36.0' height='48.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Cpath d='M466.0 188.0 V164.0 a12.0 12.0 0 0 1 24.0 0 V188.0Z' fill='%23ffd8a3'/%3E%3Cpath d='M478.0 152.0 v36.0' stroke='%2387573f' stroke-width='3'/%3E%3Crect x='390.0' y='216.0' width='36.0' height='36.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='396.0' y='222.0' width='24.0' height='24.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M408.0 222.0 v24.0 M396.0 234.0 h24.0' stroke='%2387573f' stroke-width='3'/%3E%3Crect x='464.0' y='216.0' width='36.0' height='36.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='470.0' y='222.0' width='24.0' height='24.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M482.0 222.0 v24.0 M470.0 234.0 h24.0' stroke='%2387573f' stroke-width='3'/%3E%3Cpath d='M428.0 278 V245.0 a17.0 17.0 0 0 1 34.0 0 V278Z' fill='%23a68bbd'/%3E%3Ccircle cx='453.5' cy='257.0' r='2.5' fill='%23ffd8a3'/%3E%3Ccircle cx='445.0' cy='242' r='8' fill='none' stroke='%233f6b58' stroke-width='6'/%3E%3Ccircle cx='441.0' cy='235' r='2' fill='%23e3a6b6'/%3E%3Ccircle cx='451.0' cy='237' r='2' fill='%23ffd9a0'/%3E%3Cpath d='M440.0 250 l5 -4 l5 4 l-5 5Z' fill='%23c98088'/%3E%3Crect x='666' y='128' width='46' height='150' rx='10' fill='%23a3704f'/%3E%3Cpath d='M658 134 L689.0 66 L720 134Z' fill='%235a3a6a' stroke='%23eee8f1' stroke-width='8' stroke-linejoin='round'/%3E%3Ccircle cx='689.0' cy='62' r='5' fill='%23ffd9a0'/%3E%3Crect x='674.0' y='146.0' width='30.0' height='40.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Cpath d='M680.0 180.0 V161.0 a9.0 9.0 0 0 1 18.0 0 V180.0Z' fill='%23ffd8a3'/%3E%3Cpath d='M689.0 152.0 v28.0' stroke='%23a3704f' stroke-width='3'/%3E%3Cpolyline points='669.0 136 678.0 141 687.0 136 696.0 141 705.0 136' fill='none' stroke='%23eee8f1' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3Crect x='700' y='178' width='130' height='100' rx='8' fill='%239a6a4f'/%3E%3Cpath d='M686 184 L765.0 112 L846 184Z' fill='%236c4434' stroke='%23eee8f1' stroke-width='10' stroke-linejoin='round'/%3E%3Ccircle cx='696.0' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='707.7' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='719.3' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='731.0' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='742.7' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='754.3' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='766.0' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='777.7' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='789.3' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='801.0' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='812.7' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='824.3' cy='186' r='5' fill='%23eee8f1'/%3E%3Ccircle cx='836.0' cy='186' r='5' fill='%23eee8f1'/%3E%3Cpath d='M765.0 159.28 C751.0 150.28 757.0 140.28 765.0 146.78 C773.0 140.28 779.0 150.28 765.0 159.28Z' fill='%23e3a6b6'/%3E%3Crect x='780.0' y='208.0' width='38.0' height='38.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='786.0' y='214.0' width='26.0' height='26.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M799.0 214.0 v26.0 M786.0 227.0 h26.0' stroke='%239a6a4f' stroke-width='3'/%3E%3Cpath d='M728.0 278 V246.0 a16.0 16.0 0 0 1 32.0 0 V278Z' fill='%23e3a6b6'/%3E%3Ccircle cx='752.0' cy='257.8' r='2.5' fill='%23ffd8a3'/%3E%3Cpath d='M702 194 Q765 210 834 194' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='720.1' cy='197.9' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='720.1' cy='197.9' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='738.5' cy='200.5' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='738.5' cy='200.5' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='757.1' cy='201.8' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='757.1' cy='201.8' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='776.0' cy='201.8' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='776.0' cy='201.8' r='3' fill='%23c98088'/%3E%3Ccircle cx='795.1' cy='200.5' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='795.1' cy='200.5' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='814.4' cy='197.9' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='814.4' cy='197.9' r='3' fill='%23ffd9a0'/%3E%3Crect x='1099.2' y='133.9' width='18' height='44' fill='%237a4c3a'/%3E%3Crect x='1096.2' y='129.9' width='24' height='8' rx='4' fill='%23eee8f1'/%3E%3Ccircle class='f' style='animation-delay:3.9s' cx='1108.2' cy='123.9' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:6.2s' cx='1108.2' cy='123.9' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:1.5s' cx='1108.2' cy='123.9' r='8' fill='%23cfc6d6'/%3E%3Crect x='960' y='186' width='190' height='92' rx='10' fill='%23b07b5a'/%3E%3Cpath d='M942 192 L1055.0 128 L1168 192Z' fill='%237d5040' stroke='%23eee8f1' stroke-width='0' stroke-linejoin='round'/%3E%3Cpath d='M942 192 L1055.0 128 L1168 192' fill='none' stroke='%23f4eef6' stroke-width='9' stroke-linejoin='round' stroke-linecap='round'/%3E%3Cpath d='M942 192 L1055.0 128 L1168 192' fill='none' stroke='%23c98088' stroke-width='9' stroke-dasharray='7 7' stroke-linejoin='round'/%3E%3Ccircle cx='1015.0' cy='168' r='6' fill='%23e3a6b6'/%3E%3Ccircle cx='1045.0' cy='154' r='6' fill='%23b49ac8'/%3E%3Ccircle cx='1077.0' cy='162' r='6' fill='%23ffd9a0'/%3E%3Ccircle cx='993.0' cy='182' r='6' fill='%23c98088'/%3E%3Ccircle cx='1107.0' cy='180' r='6' fill='%239fc7b5'/%3E%3Ccircle cx='1060.0' cy='180' r='6' fill='%23e3a6b6'/%3E%3Crect x='968.0' y='210.0' width='38.0' height='38.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='974.0' y='216.0' width='26.0' height='26.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M987.0 216.0 v26.0 M974.0 229.0 h26.0' stroke='%239a6a4f' stroke-width='3'/%3E%3Crect x='1104.0' y='210.0' width='38.0' height='38.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='1110.0' y='216.0' width='26.0' height='26.0' rx='5' fill='%23ffd8a3'/%3E%3Cpath d='M1123.0 216.0 v26.0 M1110.0 229.0 h26.0' stroke='%239a6a4f' stroke-width='3'/%3E%3Cpath d='M1037.0 278 V244.0 a18.0 18.0 0 0 1 36.0 0 V278Z' fill='%23c98088'/%3E%3Ccircle cx='1064.0' cy='256.2' r='2.5' fill='%23ffd8a3'/%3E%3Cpath d='M1081.0 278 V238 a9 9 0 0 1 18 0' fill='none' stroke='%23f4eef6' stroke-width='6' stroke-linecap='round'/%3E%3Cpath d='M1081.0 278 V238 a9 9 0 0 1 18 0' fill='none' stroke='%23c98088' stroke-width='6' stroke-dasharray='5 6' stroke-linecap='butt'/%3E%3Cpath d='M962 202 Q1055 216 1148 202' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='982.7' cy='204.8' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='982.7' cy='204.8' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='1003.3' cy='206.8' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1003.3' cy='206.8' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='1024.0' cy='208.2' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1024.0' cy='208.2' r='3' fill='%23c98088'/%3E%3Ccircle cx='1044.7' cy='208.9' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1044.7' cy='208.9' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='1065.3' cy='208.9' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='1065.3' cy='208.9' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='1086.0' cy='208.2' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1086.0' cy='208.2' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='1106.7' cy='206.8' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1106.7' cy='206.8' r='3' fill='%23c98088'/%3E%3Ccircle cx='1127.3' cy='204.8' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1127.3' cy='204.8' r='3' fill='%23b49ac8'/%3E%3Crect x='1344.0' y='118.0' width='18' height='44' fill='%236e4434'/%3E%3Crect x='1341.0' y='114.0' width='24' height='8' rx='4' fill='%23eee8f1'/%3E%3Ccircle class='f' style='animation-delay:5.2s' cx='1353.0' cy='108.0' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:0.5s' cx='1353.0' cy='108.0' r='8' fill='%23cfc6d6'/%3E%3Ccircle class='f' style='animation-delay:2.8s' cx='1353.0' cy='108.0' r='8' fill='%23cfc6d6'/%3E%3Crect x='1320' y='182' width='150' height='96' rx='6' fill='%23a3704f'/%3E%3Cpath d='M1320 201 h150' stroke='%238d5f43' stroke-width='2'/%3E%3Cpath d='M1320 220 h150' stroke='%238d5f43' stroke-width='2'/%3E%3Cpath d='M1320 240 h150' stroke='%238d5f43' stroke-width='2'/%3E%3Cpath d='M1320 259 h150' stroke='%238d5f43' stroke-width='2'/%3E%3Cpath d='M1294 190 L1395.0 122 L1496 190Z' fill='%235e3b2e'/%3E%3Cpath d='M1290 192 L1395.0 116 L1500 192 q-8 14 -18 2 q-10 16 -22 0 q-12 12 -22 -2 L1395.0 138 L1318 192 q-10 14 -20 2 Z' fill='%23eee8f1'/%3E%3Crect x='1340.0' y='206.0' width='34.0' height='36.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='1346.0' y='212.0' width='22.0' height='24.0' rx='3' fill='%23ffd8a3'/%3E%3Crect x='1336.1' y='212.0' width='8.8' height='24.0' rx='2' fill='%23b98292'/%3E%3Crect x='1369.1' y='212.0' width='8.8' height='24.0' rx='2' fill='%23b98292'/%3E%3Crect x='1416.0' y='206.0' width='34.0' height='36.0' rx='12' fill='%23ffc98a' opacity='0.18'/%3E%3Crect x='1422.0' y='212.0' width='22.0' height='24.0' rx='3' fill='%23ffd8a3'/%3E%3Crect x='1412.1' y='212.0' width='8.8' height='24.0' rx='2' fill='%23b98292'/%3E%3Crect x='1445.1' y='212.0' width='8.8' height='24.0' rx='2' fill='%23b98292'/%3E%3Cpath d='M1379.0 278 V246.0 a16.0 16.0 0 0 1 32.0 0 V278Z' fill='%237d5f99'/%3E%3Ccircle cx='1403.0' cy='257.8' r='2.5' fill='%23ffd8a3'/%3E%3Cpath d='M1395.0 249.4 C1386.6 244 1390.2 238 1395.0 241.9 C1399.8 238 1403.4 244 1395.0 249.4Z' fill='%23e3a6b6'/%3E%3Cpath d='M1324 202 Q1395 216 1466 202' fill='none' stroke='%233b2a2e' stroke-width='1.6'/%3E%3Ccircle cx='1344.3' cy='205.4' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1344.3' cy='205.4' r='3' fill='%23c98088'/%3E%3Ccircle cx='1364.6' cy='207.7' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1364.6' cy='207.7' r='3' fill='%23b49ac8'/%3E%3Ccircle cx='1384.9' cy='208.9' r='7' fill='%23ffd9a0' opacity='0.22'/%3E%3Ccircle cx='1384.9' cy='208.9' r='3' fill='%23ffd9a0'/%3E%3Ccircle cx='1405.1' cy='208.9' r='7' fill='%23e3a6b6' opacity='0.22'/%3E%3Ccircle cx='1405.1' cy='208.9' r='3' fill='%23e3a6b6'/%3E%3Ccircle cx='1425.4' cy='207.7' r='7' fill='%23c98088' opacity='0.22'/%3E%3Ccircle cx='1425.4' cy='207.7' r='3' fill='%23c98088'/%3E%3Ccircle cx='1445.7' cy='205.4' r='7' fill='%23b49ac8' opacity='0.22'/%3E%3Ccircle cx='1445.7' cy='205.4' r='3' fill='%23b49ac8'/%3E%3Cpath d='M0 274 Q160 264 360 276 T760 274 T1160 276 T1600 272 V320 H0Z' fill='%23d8d1df'/%3E%3Cpath d='M0 288 Q300 278 700 290 T1600 286 V320 H0Z' fill='%23c6bed0'/%3E%3C/svg%3E") bottom center / cover no-repeat;
+}
+
+/* La neige : deux couches du même motif, qui tombent lentement */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='white'%3E%3Ccircle cx='231' cy='286' r='2.4' opacity='0.7'/%3E%3Ccircle cx='260' cy='300' r='1.6' opacity='0.5'/%3E%3Ccircle cx='262' cy='243' r='1.6' opacity='0.5'/%3E%3Ccircle cx='228' cy='155' r='1.6' opacity='0.5'/%3E%3Ccircle cx='275' cy='21' r='2.4' opacity='0.7'/%3E%3Ccircle cx='80' cy='7' r='1.2' opacity='0.5'/%3E%3Ccircle cx='18' cy='97' r='1.6' opacity='0.9'/%3E%3Ccircle cx='15' cy='237' r='2' opacity='0.7'/%3E%3Ccircle cx='100' cy='265' r='1.6' opacity='0.9'/%3E%3Ccircle cx='150' cy='255' r='1.2' opacity='0.9'/%3E%3Ccircle cx='43' cy='234' r='2' opacity='0.7'/%3E%3Ccircle cx='282' cy='42' r='2' opacity='0.7'/%3E%3Ccircle cx='117' cy='262' r='2' opacity='0.5'/%3E%3Ccircle cx='35' cy='288' r='1.2' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='white'%3E%3Ccircle cx='231' cy='286' r='2.4' opacity='0.7'/%3E%3Ccircle cx='260' cy='300' r='1.6' opacity='0.5'/%3E%3Ccircle cx='262' cy='243' r='1.6' opacity='0.5'/%3E%3Ccircle cx='228' cy='155' r='1.6' opacity='0.5'/%3E%3Ccircle cx='275' cy='21' r='2.4' opacity='0.7'/%3E%3Ccircle cx='80' cy='7' r='1.2' opacity='0.5'/%3E%3Ccircle cx='18' cy='97' r='1.6' opacity='0.9'/%3E%3Ccircle cx='15' cy='237' r='2' opacity='0.7'/%3E%3Ccircle cx='100' cy='265' r='1.6' opacity='0.9'/%3E%3Ccircle cx='150' cy='255' r='1.2' opacity='0.9'/%3E%3Ccircle cx='43' cy='234' r='2' opacity='0.7'/%3E%3Ccircle cx='282' cy='42' r='2' opacity='0.7'/%3E%3Ccircle cx='117' cy='262' r='2' opacity='0.5'/%3E%3Ccircle cx='35' cy='288' r='1.2' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 300px 300px, 190px 190px;
+    animation: neige 50s linear infinite;
+}
+
+/* Chaque couche descend d'un nombre entier de motifs : la boucle est invisible */
+@keyframes neige {
+    from { background-position: 0 0, 60px 40px; }
+    to   { background-position: 300px 900px, -130px 610px; }
+}
+
+/* Profondeur : en faisant défiler, le premier plan descend plus vite que l'arrière-plan */
+@supports (animation-timeline: scroll()) {
+    html::before {
+        animation: parallaxe-loin linear both;
+        animation-timeline: scroll(root);
+    }
+
+    body::before {
+        animation: parallaxe-pres linear both;
+        animation-timeline: scroll(root);
+    }
+
+    @keyframes parallaxe-loin {
+        to { transform: translateY(3vh); }
+    }
+
+    @keyframes parallaxe-pres {
+        to { transform: translateY(9vh); }
+    }
+}
+
+/* =========================================================
+   La barre de navigation : en haut, en verre flouté
+   ========================================================= */
 header {
-    text-align: center;
-    margin-bottom: 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 1rem;
+    /* la barre prend toute la largeur, son contenu tient sur 1200 px au maximum */
+    margin: 0 calc(-1 * var(--marge)) 2rem;
+    padding: 0.7rem max(var(--marge), calc(50vw - 600px));
+    background: rgba(19, 17, 22, 0.72);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--bord);
 }
 
 h1 {
+    flex: 1;
     margin: 0;
-    font-family: var(--f-affiche);
-    font-weight: 400;
-    font-size: 2rem;
-    line-height: 1.1;
-    color: var(--moutarde);
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
 }
 
 h2 {
     margin: 0 0 0.75rem;
-    font-family: var(--f-affiche);
-    font-weight: 400;
-    font-size: 1.6rem;
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: -0.02em;
 }
 
 main {
@@ -85,17 +200,33 @@ main {
     margin: 0 auto;
 }
 
-/* ===== Boutons ===== */
+a {
+    color: var(--rose);
+}
+
+/* Liens de la barre : du texte simple, qui s'éclaire au survol */
+header a {
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--texte-doux);
+    transition: color 0.15s ease;
+}
+
+header a:hover {
+    color: var(--texte);
+}
+
+/* ===== Boutons : pilules pleines, sans ombre ===== */
 button {
     font: inherit;
-    font-weight: 700;
-    color: var(--vert);
-    background: var(--moutarde);
+    font-weight: 500;
+    color: #1d1519;
+    background: var(--rose);
     border: none;
     border-radius: 999px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.7rem 1.5rem;
     cursor: pointer;
-    transition: transform 0.15s ease, filter 0.15s ease;
+    transition: filter 0.15s ease, transform 0.15s ease;
 }
 
 button:hover {
@@ -103,217 +234,278 @@ button:hover {
 }
 
 button:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
 }
 
-button:focus-visible {
-    outline: 3px solid var(--blanc);
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--rose);
     outline-offset: 3px;
 }
+
+/* =========================================================
+   Page du calendrier
+   ========================================================= */
 
 /* ===== Écrans d'attente et de Noël ===== */
 #ecran-attente,
 #ecran-noel {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
     text-align: center;
-    padding: 2.5rem 1rem;
-    border-radius: var(--rayon);
-    background-color: var(--rouge);
-    background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 12px, transparent 12px 24px);
+    background: var(--surface);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon-carte);
+    box-shadow: var(--ombre);
 }
 
-#ecran-noel {
-    background-color: var(--vert-moyen);
-}
-
+#ecran-attente h2,
 #ecran-noel h2 {
-    font-size: 2.4rem;
-    color: var(--moutarde);
+    font-size: 2rem;
+}
+
+#ecran-attente p,
+#ecran-noel p {
+    color: var(--texte-doux);
 }
 
 #compte-a-rebours {
-    margin: 0;
-    font-family: var(--f-etroite);
+    margin: 0.5rem 0 0;
+    font-weight: 200;
     font-size: 2.6rem;
-    letter-spacing: 0.04em;
+    letter-spacing: -0.03em;
     line-height: 1.1;
-    color: var(--blanc);
+    color: var(--texte);
     font-variant-numeric: tabular-nums;
 }
 
-/* ===== La mosaïque (mobile : 4 colonnes) ===== */
+/* Liens dans les écrans (page 404) */
+#ecran-noel a,
+#ecran-attente a {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.65rem 1.5rem;
+    font-weight: 500;
+    color: #1d1519;
+    background: var(--rose);
+    border-radius: 999px;
+    text-decoration: none;
+}
+
+/* ===== La mosaïque de cadeaux (mobile : 6 colonnes et 8 lignes) ===== */
+/* C'est la mosaïque de l'ordinateur, tournée d'un quart de tour */
 #grille {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
     gap: var(--ecart);
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, var(--unite));
     grid-auto-rows: var(--unite); /* des lignes aussi hautes que les colonnes : cases carrées */
+    justify-content: center;
     grid-template-areas:
-        "d7  d18 d18 d3"
-        "d12 d18 d18 d3"
-        "d12 d1  d10 d10"
-        "d22 d22 d10 d10"
-        "d22 d22 d5  d16"
-        "d8  d13 d13 d16"
-        "d8  d24 d24 d4"
-        "d19 d24 d24 d4"
-        "d19 d11 d6  d6"
-        "d15 d11 d21 d21"
-        "d15 d9  d9  d23"
-        "d2  d14 d17 d23"
-        "d20 d20 d17 d23";
+        "d1  d1  d16 d16 d6  d2"
+        "d1  d1  d9  d9  d6  d21"
+        "d14 d22 d22 d11 d11 d21"
+        "d7  d22 d22 d11 d11 d8"
+        "d7  d10 d10 d20 d20 d15"
+        "d19 d19 d5  d5  d13 d12"
+        "d19 d19 d24 d24 d18 d4"
+        "d3  d3  d24 d24 d17 d23";
 }
 
-/* ===== Une case ===== */
+/* ===== Un cadeau : un papier de couleur poudrée, un fin ruban noir ===== */
 #grille li {
-    --bg: var(--rouge);
-    --fg: var(--blanc);
-    --police-chiffre: var(--f-affiche);
-    --echelle: 0.62;  /* taille du chiffre par rapport au côté d'une case */
-    --grand: 1;       /* 2 pour les cases de 2x2 */
-    --motif: none;
-    --deco: "";
+    --accent: var(--rose);        /* couleur du papier */
+    --ruban: #1d1a21;             /* ruban noir */
+    --grand: 1;                   /* 1,8 pour les cases de 2x2 */
+    --rx: 24%;                    /* position du ruban vertical */
+    --ry: 28%;                    /* position du ruban horizontal */
+    --largeur-ruban: max(1.5px, calc(var(--unite) * 0.022 * var(--grand)));
 
     position: relative;
     display: grid;
     place-items: center;
+    /* le chiffre se décale vers le bas et la droite, pour laisser la place au nœud */
+    padding: calc(var(--unite) * 0.12 * var(--grand)) 0 0 calc(var(--unite) * 0.12 * var(--grand));
     overflow: hidden;
     border-radius: var(--rayon);
-    background-color: var(--bg);
-    background-image: var(--motif);
-    color: var(--fg);
-    font-family: var(--police-chiffre);
+    background-color: var(--accent);
+    background-image:
+        /* ruban vertical */
+        linear-gradient(90deg,
+            transparent calc(var(--rx) - var(--largeur-ruban)),
+            var(--ruban) 0,
+            var(--ruban) calc(var(--rx) + var(--largeur-ruban)),
+            transparent 0),
+        /* ruban horizontal */
+        linear-gradient(180deg,
+            transparent calc(var(--ry) - var(--largeur-ruban)),
+            var(--ruban) 0,
+            var(--ruban) calc(var(--ry) + var(--largeur-ruban)),
+            transparent 0),
+        /* léger reflet en haut, comme une carte en verre */
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 55%);
+    box-shadow: inset 0 0 0 1px var(--bord);
+    color: #221a20;
+    font-family: var(--police);
     font-weight: 400;
-    font-size: calc(var(--unite) * var(--echelle) * var(--grand));
+    font-size: calc(var(--unite) * 0.46 * var(--grand));
+    letter-spacing: -0.04em;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
     cursor: pointer;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
-    transition: transform 0.2s ease, filter 0.2s ease;
+    transition: transform 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* Petit décor dans le coin */
-#grille li::after {
-    content: var(--deco);
+/* Les deux boucles du nœud : deux anneaux fins */
+#grille li::before {
+    content: "";
     position: absolute;
-    top: 6%;
-    right: 8%;
-    font-family: var(--police-texte);
-    font-size: calc(var(--unite) * 0.18);
-    color: var(--fg);
-    opacity: 0.75;
+    left: var(--rx);
+    top: var(--ry);
+    width: calc(var(--unite) * 0.34 * var(--grand));
+    height: calc(var(--unite) * 0.17 * var(--grand));
+    transform: translate(-50%, -78%);
+    background:
+        radial-gradient(closest-side at 25% 50%, transparent 58%, var(--ruban) 62% 90%, transparent 96%),
+        radial-gradient(closest-side at 75% 50%, transparent 58%, var(--ruban) 62% 90%, transparent 96%);
 }
 
-#grille li:hover {
-    filter: brightness(1.08);
+/* Le petit rond au centre du nœud */
+#grille li::after {
+    content: "";
+    position: absolute;
+    left: var(--rx);
+    top: var(--ry);
+    width: calc(var(--unite) * 0.08 * var(--grand));
+    height: calc(var(--unite) * 0.08 * var(--grand));
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: var(--ruban);
 }
 
-#grille li:active {
-    transform: scale(0.97);
-}
+/* Trois couleurs de papier, qui se répètent */
+#grille li:nth-child(3n + 1) { --accent: var(--rose); }
+#grille li:nth-child(3n + 2) { --accent: var(--prune); }
+#grille li:nth-child(3n + 3) { --accent: var(--rouge); }
 
-/* ===== Placement, couleurs et polices de chaque jour ===== */
-#grille li:nth-child(1)  { grid-area: d1;  --bg: var(--moutarde);   --fg: var(--blanc);      --police-chiffre: var(--f-affiche); }
-#grille li:nth-child(2)  { grid-area: d2;  --bg: var(--turquoise);  --fg: var(--blanc);      --police-chiffre: var(--f-ronde); --deco: "♪"; }
-#grille li:nth-child(3)  { grid-area: d3;  --bg: var(--rouge);      --fg: var(--rouge-fonce); --police-chiffre: var(--f-etroite); --echelle: 0.8; }
-#grille li:nth-child(4)  { grid-area: d4;  --bg: var(--vert);       --fg: var(--blanc);      --police-chiffre: var(--f-etroite); --echelle: 0.8;
-                           --motif: radial-gradient(circle, var(--moutarde) 2px, transparent 2.5px); }
-#grille li:nth-child(5)  { grid-area: d5;  --bg: var(--ocre);       --fg: var(--blanc);      --police-chiffre: var(--f-italique); --deco: "✦"; }
-#grille li:nth-child(6)  { grid-area: d6;  --bg: var(--vert-moyen); --fg: var(--turquoise);  --police-chiffre: var(--f-etroite); --echelle: 0.8; }
-#grille li:nth-child(7)  { grid-area: d7;  --bg: var(--vert-moyen); --fg: var(--vert);       --police-chiffre: var(--f-etroite); --echelle: 0.8; --deco: "❄"; }
-#grille li:nth-child(8)  { grid-area: d8;  --bg: var(--turquoise);  --fg: var(--vert);       --police-chiffre: var(--f-ronde); }
-#grille li:nth-child(9)  { grid-area: d9;  --bg: var(--moutarde);   --fg: var(--blanc);      --police-chiffre: var(--f-italique); --deco: "★"; }
-#grille li:nth-child(10) { grid-area: d10; --bg: var(--turquoise);  --fg: var(--menthe);     --police-chiffre: var(--f-ronde); --deco: "♫"; }
-#grille li:nth-child(11) { grid-area: d11; --bg: var(--rouge);      --fg: var(--blanc);      --police-chiffre: var(--f-italique); }
-#grille li:nth-child(12) { grid-area: d12; --bg: var(--moutarde);   --fg: var(--ocre);       --police-chiffre: var(--f-etroite); --echelle: 0.8; }
-#grille li:nth-child(13) { grid-area: d13; --bg: var(--rouge);      --fg: var(--vert);       --police-chiffre: var(--f-ronde);
-                           --motif: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0 8px, transparent 8px 16px); }
-#grille li:nth-child(14) { grid-area: d14; --bg: var(--ocre);       --fg: var(--blanc);      --police-chiffre: var(--f-affiche); }
-#grille li:nth-child(15) { grid-area: d15; --bg: var(--vert);       --fg: var(--rouge);      --police-chiffre: var(--f-etroite); --echelle: 0.8; --deco: "♪"; }
-#grille li:nth-child(16) { grid-area: d16; --bg: var(--turquoise);  --fg: var(--vert);       --police-chiffre: var(--f-etroite); --echelle: 0.8; }
-#grille li:nth-child(17) { grid-area: d17; --bg: var(--vert);       --fg: var(--turquoise);  --police-chiffre: var(--f-ronde); --deco: "✦"; }
-#grille li:nth-child(18) { grid-area: d18; --bg: var(--vert-moyen); --fg: var(--vert);       --police-chiffre: var(--f-ronde);
-                           --motif: radial-gradient(circle, rgba(255, 255, 255, 0.18) 3px, transparent 3.5px); }
-#grille li:nth-child(19) { grid-area: d19; --bg: var(--moutarde);   --fg: var(--ocre);       --police-chiffre: var(--f-etroite); --echelle: 0.8; }
-#grille li:nth-child(20) { grid-area: d20; --bg: var(--rouge);      --fg: var(--blanc);      --police-chiffre: var(--f-affiche); --deco: "❄";
-                           --motif: radial-gradient(circle, var(--rouge-fonce) 6px, transparent 6.5px); }
-#grille li:nth-child(21) { grid-area: d21; --bg: var(--rouge);      --fg: var(--blanc);      --police-chiffre: var(--f-affiche); }
-#grille li:nth-child(22) { grid-area: d22; --bg: var(--moutarde);   --fg: var(--blanc);      --police-chiffre: var(--f-ronde);
-                           --motif: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.12) 0 10px, transparent 10px 20px); }
-#grille li:nth-child(23) { grid-area: d23; --bg: var(--turquoise);  --fg: var(--menthe);     --police-chiffre: var(--f-etroite); --echelle: 0.8; }
-#grille li:nth-child(24) { grid-area: d24; --bg: var(--vert);       --fg: var(--blanc);      --police-chiffre: var(--f-affiche); --deco: "★";
-                           --motif: radial-gradient(circle, rgba(255, 255, 255, 0.35) 1.5px, transparent 2px); }
+/* ===== Placement de chaque jour dans la mosaïque ===== */
+#grille li:nth-child(1)  { grid-area: d1; }
+#grille li:nth-child(2)  { grid-area: d2; }
+#grille li:nth-child(3)  { grid-area: d3; }
+#grille li:nth-child(4)  { grid-area: d4; }
+#grille li:nth-child(5)  { grid-area: d5; }
+#grille li:nth-child(6)  { grid-area: d6; }
+#grille li:nth-child(7)  { grid-area: d7; }
+#grille li:nth-child(8)  { grid-area: d8; }
+#grille li:nth-child(9)  { grid-area: d9; }
+#grille li:nth-child(10) { grid-area: d10; }
+#grille li:nth-child(11) { grid-area: d11; }
+#grille li:nth-child(12) { grid-area: d12; }
+#grille li:nth-child(13) { grid-area: d13; }
+#grille li:nth-child(14) { grid-area: d14; }
+#grille li:nth-child(15) { grid-area: d15; }
+#grille li:nth-child(16) { grid-area: d16; }
+#grille li:nth-child(17) { grid-area: d17; }
+#grille li:nth-child(18) { grid-area: d18; }
+#grille li:nth-child(19) { grid-area: d19; }
+#grille li:nth-child(20) { grid-area: d20; }
+#grille li:nth-child(21) { grid-area: d21; }
+#grille li:nth-child(22) { grid-area: d22; }
+#grille li:nth-child(23) { grid-area: d23; }
+#grille li:nth-child(24) { grid-area: d24; }
 
-/* Cases de 2x2 sur téléphone : chiffre deux fois plus grand */
-#grille li:nth-child(10),
-#grille li:nth-child(18),
+/* Cases de 2x2 sur téléphone : chiffre et nœud plus grands */
+#grille li:nth-child(1),
+#grille li:nth-child(11),
+#grille li:nth-child(19),
 #grille li:nth-child(22),
 #grille li:nth-child(24) {
     --grand: 1.8;
 }
 
-/* Les motifs en pois se répètent sur une petite grille */
-#grille li:nth-child(4),
-#grille li:nth-child(18),
-#grille li:nth-child(20),
-#grille li:nth-child(24) {
-    background-size: 18px 18px;
-}
-
 /* ===== États ===== */
 
-/* Ouvrable mais pas encore ouverte : un liseré doré qui pulse pour inviter au clic */
+/* Ouvrable mais pas encore ouvert : un liseré et un halo très doux de la couleur du ruban */
 #grille li:not(.verrouillee):not(.ouverte) {
-    box-shadow: inset 0 0 0 3px var(--moutarde);
-    animation: invitation 2.2s ease-in-out infinite;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
+        0 0 28px -8px color-mix(in srgb, var(--accent) 60%, transparent);
+    animation: lueur 3s ease-in-out infinite;
 }
 
-@keyframes invitation {
-    0%, 100% { box-shadow: inset 0 0 0 3px var(--moutarde); }
-    50% { box-shadow: inset 0 0 0 6px var(--moutarde); }
+@keyframes lueur {
+    50% {
+        box-shadow:
+            inset 0 0 0 1px color-mix(in srgb, var(--accent) 70%, transparent),
+            0 0 36px -6px color-mix(in srgb, var(--accent) 75%, transparent);
+    }
 }
 
-/* Déjà ouverte : la porte est « retournée », couleurs inversées */
+#grille li:not(.verrouillee):hover {
+    transform: translateY(-3px);
+    filter: brightness(1.06);
+}
+
+#grille li:not(.verrouillee):active {
+    transform: scale(0.97);
+}
+
+/* Déjà ouvert : le papier est retiré, il reste une boîte sombre teintée de sa couleur */
 #grille li.ouverte {
-    background-color: var(--creme);
+    color: var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 14%, var(--surface));
     background-image: none;
-    color: var(--bg);
-    animation: ouverture 0.5s ease;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent);
+    padding: 0;
+    animation: ouverture 0.6s ease;
+}
+
+#grille li.ouverte::before {
+    content: "✓";
+    left: auto;
+    right: 9%;
+    top: 7%;
+    width: auto;
+    height: auto;
+    transform: none;
+    background: none;
+    font-size: calc(var(--unite) * 0.16 * var(--grand));
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--accent);
 }
 
 #grille li.ouverte::after {
-    content: "✓";
-    color: var(--bg);
+    display: none;
 }
 
 @keyframes ouverture {
-    0% { transform: perspective(600px) rotateY(0); }
-    50% { transform: perspective(600px) rotateY(90deg); }
+    0%   { transform: perspective(600px) rotateY(0); }
+    50%  { transform: perspective(600px) rotateY(90deg); }
     100% { transform: perspective(600px) rotateY(0); }
 }
 
-/* Pas encore ouvrable */
+/* Pas encore ouvrable : le papier garde sa couleur, mais très assombrie */
 #grille li.verrouillee {
+    --ruban: #151317;
     cursor: not-allowed;
-    filter: saturate(0.85);
+    background-color: color-mix(in srgb, var(--accent) 24%, var(--surface));
+    color: color-mix(in srgb, var(--accent) 45%, var(--texte-pale));
 }
 
-#grille li.verrouillee:hover {
-    filter: saturate(0.85);
-}
-
-#grille li.verrouillee:active {
-    transform: none;
-}
-
-/* Secousse au clic sur une case verrouillée */
+/* Secousse au clic sur un cadeau verrouillé */
 @keyframes secousse {
     0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-6px) rotate(-2deg); }
-    40% { transform: translateX(6px) rotate(2deg); }
-    60% { transform: translateX(-4px) rotate(-1deg); }
-    80% { transform: translateX(4px) rotate(1deg); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
 }
 
 #grille li.secousse {
@@ -325,23 +517,79 @@ button:focus-visible {
     visibility: hidden;
 }
 
-/* ===== Fenêtre cadeau ===== */
+/* Tailles variables (classes posées depuis le JS) */
+#grille li.taille-large {
+    grid-column: span 2;
+    aspect-ratio: auto;
+}
+
+#grille li.taille-grande {
+    grid-column: span 2;
+    grid-row: span 2;
+    --grand: 1.8;
+}
+
+/* Bouton « cadeaux non ouverts » sous la grille */
+#bouton-non-ouverts {
+    display: block;
+    margin: 1.5rem auto 0;
+}
+
+/* ===== Page du calendrier : tout tient dans l'écran, sans défilement ===== */
+/* :has() repère la page qui contient la grille, sans toucher au HTML */
+body:has(#grille) {
+    height: 100vh;
+    height: 100dvh;       /* sur téléphone : la hauteur réelle, sans la barre d'adresse */
+    overflow: hidden;
+    padding-bottom: 0;
+}
+
+body:has(#grille) header {
+    margin-bottom: 1.25rem;
+}
+
+/* Le côté d'une case est le plus petit des deux :
+   celui qui remplit la largeur, et celui qui fait tenir les 8 lignes dans la hauteur
+   (6rem = la barre du haut et les marges au-dessus et en dessous de la grille) */
+#grille {
+    --unite: min(
+        calc((100vw - 2 * var(--marge) - 5 * var(--ecart)) / 6),
+        calc((100dvh - 6rem - 7 * var(--ecart)) / 8)
+    );
+}
+
+/* Après Noël, le bouton « cadeaux non ouverts » flotte en bas de l'écran */
+body:has(#grille) #bouton-non-ouverts {
+    position: fixed;
+    left: 50%;
+    bottom: 1.25rem;
+    z-index: 5;
+    margin: 0;
+    transform: translateX(-50%);
+    box-shadow: var(--ombre);
+}
+
+body:has(#grille) #bouton-non-ouverts:active {
+    transform: translateX(-50%) scale(0.97);
+}
+
+/* ===== Fenêtre du cadeau ===== */
 #fenetre-cadeau {
-    width: min(92vw, 520px);
+    width: min(92vw, 500px);
     max-height: 90vh;
-    padding: 1.5rem;
-    color: var(--vert);
-    background: var(--creme);
-    border: none;
-    border-top: 10px solid var(--rouge);
-    border-radius: var(--rayon);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+    padding: 2rem 1.5rem 1.5rem;
+    color: var(--texte);
+    background: var(--surface);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon-carte);
+    box-shadow: var(--ombre);
     text-align: center;
 }
 
 #fenetre-cadeau::backdrop {
-    background: rgba(8, 30, 28, 0.8);
-    backdrop-filter: blur(3px);
+    background: rgba(10, 8, 12, 0.6);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
 }
 
 #fenetre-cadeau[open] {
@@ -349,13 +597,13 @@ button:focus-visible {
 }
 
 @keyframes apparition {
-    from { opacity: 0; transform: translateY(24px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from { opacity: 0; transform: translateY(16px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 #cadeau-titre {
-    font-size: 2rem;
-    color: var(--rouge);
+    font-size: 1.8rem;
+    color: var(--rose);
 }
 
 #cadeau-media:empty {
@@ -369,13 +617,14 @@ button:focus-visible {
     max-height: 55vh;
     height: auto;
     margin: 0 auto 1rem;
-    border-radius: var(--rayon);
+    border-radius: 14px;
     object-fit: contain;
 }
 
 #cadeau-texte {
     margin: 0 0 1.25rem;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
+    color: var(--texte-doux);
     white-space: pre-line;
 }
 
@@ -383,29 +632,30 @@ button:focus-visible {
     display: none;
 }
 
-#cadeau-fermer {
-    color: var(--blanc);
-    background: var(--rouge);
-}
-
-/* ===== Grands écrans : mosaïque sur 8 colonnes ===== */
+/* ===== Calendrier sur grands écrans : mosaïque sur 8 colonnes ===== */
 @media (min-width: 640px) {
     :root {
-        --ecart: 0.75rem;
+        --ecart: 0.85rem;
         --marge: 2rem;
         --unite: calc((min(100vw - 2 * var(--marge), 960px) - 7 * var(--ecart)) / 8);
     }
 
-    body {
-        padding-top: 2.5rem;
+    header {
+        margin-bottom: 3rem;
     }
 
     h1 {
-        font-size: 3rem;
+        font-size: 1.2rem;
+        white-space: nowrap;   /* le titre reste sur une ligne */
     }
 
+    /* Sur ordinateur : 8 colonnes et 6 lignes */
     #grille {
-        grid-template-columns: repeat(8, 1fr);
+        --unite: min(
+            calc((min(100vw - 2 * var(--marge), 960px) - 7 * var(--ecart)) / 8),
+            calc((100dvh - 6rem - 5 * var(--ecart)) / 6)
+        );
+        grid-template-columns: repeat(8, var(--unite));
         grid-template-areas:
             "d1  d1  d14 d7  d7  d19 d19 d3"
             "d1  d1  d22 d22 d10 d19 d19 d3"
@@ -415,71 +665,58 @@ button:focus-visible {
             "d2  d21 d21 d8  d15 d12 d4  d23";
     }
 
-    /* Sur ordinateur, ce ne sont plus les mêmes cases qui font 2x2 */
-    #grille li:nth-child(10),
-    #grille li:nth-child(18) {
-        --grand: 1;
-    }
-
-    #grille li:nth-child(1),
-    #grille li:nth-child(11),
-    #grille li:nth-child(19),
-    #grille li:nth-child(22),
-    #grille li:nth-child(24) {
-        --grand: 1.8;
-    }
-
     #compte-a-rebours {
-        font-size: 4rem;
+        font-size: 3.6rem;
     }
 }
 
 /* =========================================================
-   Pages avec formulaire : accueil et création
+   Pages avec formulaire : accueil, connexion, inscription,
+   création, modification
    ========================================================= */
-
-/* Liens sur fond sombre (en-tête) */
-header a {
-    display: inline-block;
-    margin-top: 0.5rem;
-    color: var(--menthe);
-    font-weight: 600;
-}
 
 /* Les cartes : formulaires et résultat */
 main > form,
 #resultat {
     max-width: 640px;
     margin: 0 auto 1.5rem;
-    padding: 1.5rem 1.25rem;
-    color: var(--vert);
-    background: var(--creme);
-    border-top: 10px solid var(--rouge);
-    border-radius: var(--rayon);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    padding: 1.6rem 1.3rem;
+    color: var(--texte);
+    background: var(--surface);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon-carte);
+    box-shadow: var(--ombre);
 }
 
 main > form h2,
 #resultat h2 {
     margin-top: 1.5rem;
-    color: var(--rouge);
 }
 
 #resultat h2 {
     margin-top: 0;
 }
 
-main > form p {
+main > form p,
+#resultat p {
     margin: 0 0 1rem;
     font-size: 0.95rem;
-    color: var(--vert-moyen);
+    color: var(--texte-doux);
+}
+
+main > form a,
+#resultat a {
+    color: var(--rose);
+    font-weight: 500;
 }
 
 /* Libellés et champs */
 main > form label {
     display: block;
-    margin: 1rem 0 0.35rem;
-    font-weight: 700;
+    margin: 1rem 0 0.4rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--texte-doux);
 }
 
 main > form label:first-child,
@@ -488,17 +725,19 @@ fieldset legend + label {
 }
 
 main > form input[type="text"],
+main > form input[type="email"],
+main > form input[type="password"],
 main > form input[type="number"],
 main > form textarea {
     display: block;
     width: 100%;
-    padding: 0.7rem 0.85rem;
+    padding: 0.75rem 1rem;
     font: inherit;
     font-size: 1rem; /* 16 px minimum : sinon l'iPhone zoome sur le champ */
-    color: var(--vert);
-    background: #fff;
-    border: 2px solid #ddd0b8;
-    border-radius: 8px;
+    color: var(--texte);
+    background: var(--fond);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -510,8 +749,8 @@ main > form textarea {
 main > form input:focus,
 main > form textarea:focus {
     outline: none;
-    border-color: var(--moutarde);
-    box-shadow: 0 0 0 4px rgba(244, 182, 63, 0.3);
+    border-color: var(--rose);
+    box-shadow: 0 0 0 4px rgba(227, 166, 182, 0.18);
 }
 
 /* Champ fichier : le bouton du sélecteur prend le style du site */
@@ -519,18 +758,18 @@ main > form input[type="file"] {
     display: block;
     width: 100%;
     font: inherit;
-    font-size: 0.95rem;
-    color: var(--vert-moyen);
+    font-size: 0.9rem;
+    color: var(--texte-doux);
 }
 
 main > form input[type="file"]::file-selector-button {
     margin-right: 0.75rem;
-    padding: 0.5rem 1rem;
+    padding: 0.45rem 1rem;
     font: inherit;
-    font-weight: 700;
-    color: var(--blanc);
-    background: var(--vert-moyen);
-    border: none;
+    font-weight: 500;
+    color: var(--texte);
+    background: var(--surface-2);
+    border: 1px solid var(--bord);
     border-radius: 999px;
     cursor: pointer;
 }
@@ -539,86 +778,233 @@ main > form input[type="file"]::file-selector-button {
 main > form button[type="submit"] {
     display: block;
     width: 100%;
-    margin-top: 1.25rem;
-    padding: 0.95rem 1.5rem;
-    font-size: 1.1rem;
-    color: var(--blanc);
-    background: var(--rouge);
+    margin-top: 1.5rem;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
 }
 
 main > form button[type="submit"]:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: wait;
 }
 
-/* Messages d'erreur (vides = invisibles) */
+/* Messages d'erreur et de succès (vides = invisibles) */
 #paragraphe-erreur,
 #message-erreur {
     margin: 0.75rem 0 0;
-    padding: 0.6rem 0.8rem;
-    font-weight: 700;
-    color: var(--rouge-fonce);
-    background: #fbe3e0;
-    border-left: 4px solid var(--rouge);
-    border-radius: 4px;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    color: #f0b8be;
+    background: rgba(201, 128, 136, 0.12);
+    border: 1px solid rgba(201, 128, 136, 0.25);
+    border-radius: 12px;
+}
+
+#message-succes {
+    margin: 0.75rem 0 0;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.9rem;
+    color: #d6c4e4;
+    background: rgba(180, 154, 200, 0.12);
+    border: 1px solid rgba(180, 154, 200, 0.25);
+    border-radius: 12px;
 }
 
 #paragraphe-erreur:empty,
-#message-erreur:empty {
+#message-erreur:empty,
+#message-succes:empty {
     display: none;
 }
 
-/* ===== Accueil : le lien « Créer mon calendrier » en grosse tuile ===== */
-main > a[href="/creer"] {
-    display: block;
+/* =========================================================
+   Accueil : grande phrase d'accroche et code au centre
+   ========================================================= */
+.accroche {
     max-width: 640px;
-    margin: 0 auto;
-    padding: 1.5rem 1rem;
+    margin: 10vh auto 2rem;
     text-align: center;
-    text-decoration: none;
-    font-family: var(--f-affiche);
-    font-size: 1.6rem;
-    color: var(--blanc);
-    background-color: var(--vert-moyen);
-    background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 12px, transparent 12px 24px);
-    border-radius: var(--rayon);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    transition: transform 0.15s ease, filter 0.15s ease;
 }
 
-main > a[href="/creer"]:hover {
-    filter: brightness(1.1);
-    transform: translateY(-2px);
+.accroche h2 {
+    margin: 0 0 0.6rem;
+    font-size: clamp(2rem, 8vw, 3.4rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+    /* dégradé poudré dans le texte, très discret */
+    background: linear-gradient(90deg, var(--rose), var(--prune));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
-/* ===== Création : une carte par jour, couleur tournante ===== */
+.accroche p {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--texte-doux);
+}
+
+#formulaire-code {
+    max-width: 420px;
+    text-align: center;
+}
+
+#formulaire-code input {
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+
+#formulaire-code button[type="submit"] {
+    display: inline-block;
+    width: auto;
+    margin: 1.25rem auto 0;
+    padding: 0.75rem 2rem;
+}
+
+/* =========================================================
+   Accueil : la barre de navigation
+   Titre à gauche ; à droite les liens du compte
+   et le bouton « Créer mon calendrier »
+   ========================================================= */
+header .zone-compte {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+header .zone-compte a,
+header .zone-compte button,
+header a.bouton-creer {
+    white-space: nowrap;
+}
+
+/* L'adresse email, en petit et en gris, avant les liens */
+header .zone-compte p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--texte-pale);
+}
+
+/* « Se déconnecter » ressemble à un lien, pas à un bouton */
+header .zone-compte button {
+    padding: 0;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--texte-doux);
+    background: none;
+    border: none;
+    border-radius: 0;
+    transition: color 0.15s ease;
+}
+
+header .zone-compte button:hover {
+    color: var(--texte);
+    filter: none;
+}
+
+header .zone-compte button:active {
+    transform: none;
+}
+
+/* Le bouton « Créer mon calendrier » : une petite pilule rose avec un « + » */
+header a.bouton-creer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem 0.45rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1d1519;
+    background: var(--rose);
+    border-radius: 999px;
+    box-shadow: 0 0 0 0 rgba(227, 166, 182, 0);
+    transition: filter 0.15s ease, box-shadow 0.25s ease, transform 0.15s ease;
+}
+
+header a.bouton-creer::before {
+    content: "+";
+    display: grid;
+    place-items: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--rose);
+    background: #1d1519;
+    border-radius: 50%;
+}
+
+header a.bouton-creer:hover {
+    color: #1d1519;
+    filter: brightness(1.06);
+    box-shadow: 0 0 22px -4px rgba(227, 166, 182, 0.7);
+}
+
+header a.bouton-creer:active {
+    transform: scale(0.97);
+}
+
+/* Écran moyen : pas assez de place pour l'adresse email dans la barre */
+@media (min-width: 640px) and (max-width: 1099px) {
+    header .zone-compte p {
+        display: none;
+    }
+}
+
+/* Sur téléphone : titre et bouton sur la première ligne,
+   les liens du compte sur une deuxième ligne */
+@media (max-width: 639px) {
+    h1 {
+        font-size: 1rem;
+    }
+
+    header .zone-compte {
+        order: 2;
+        flex-basis: 100%;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.1rem;
+    }
+
+    header .zone-compte p {
+        flex-basis: 100%;
+        order: 2;
+        margin-top: -0.2rem;
+    }
+
+    header a.bouton-creer {
+        order: 1;
+    }
+}
+
+/* =========================================================
+   Création et modification : une carte par jour
+   ========================================================= */
 #liste-cadeaux {
     display: grid;
-    gap: 0.9rem;
+    gap: 0.75rem;
 }
 
 #liste-cadeaux fieldset {
-    --couleur-jour: var(--rouge);
+    --couleur-jour: var(--rose);
     min-width: 0; /* évite que le champ fichier élargisse la carte sur mobile */
     margin: 0;
-    padding: 1rem;
-    background: #fff;
-    border: none;
-    border-left: 6px solid var(--couleur-jour);
-    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    background: var(--surface-2);
+    border: 1px solid var(--bord);
+    border-radius: 16px;
 }
 
-#liste-cadeaux fieldset:nth-child(4n + 2) { --couleur-jour: var(--vert-moyen); }
-#liste-cadeaux fieldset:nth-child(4n + 3) { --couleur-jour: var(--moutarde); }
-#liste-cadeaux fieldset:nth-child(4n + 4) { --couleur-jour: var(--turquoise); }
+#liste-cadeaux fieldset:nth-child(3n + 2) { --couleur-jour: var(--prune); }
+#liste-cadeaux fieldset:nth-child(3n + 3) { --couleur-jour: var(--rouge); }
 
 #liste-cadeaux legend {
     float: left;          /* place la légende dans la carte, au-dessus des champs */
     width: 100%;
     margin-bottom: 0.5rem;
     padding: 0;
-    font-family: var(--f-affiche);
-    font-size: 1.4rem;
+    font-weight: 600;
+    font-size: 1.1rem;
     color: var(--couleur-jour);
 }
 
@@ -627,118 +1013,15 @@ main > a[href="/creer"]:hover {
 }
 
 #liste-cadeaux label {
-    font-size: 0.9rem;
-}
-
-/* Résultat : le lien à partager */
-#lien-partage a {
-    display: block;
-    padding: 0.8rem;
-    font-weight: 700;
-    color: var(--rouge-fonce);
-    background: #fff;
-    border: 2px dashed var(--moutarde);
-    border-radius: 8px;
-    word-break: break-all;
-}
-
-@media (min-width: 640px) {
-    main > form,
-    #resultat {
-        padding: 2rem;
-    }
-
-    #liste-cadeaux {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    main > form,
-    #resultat,
-    main > a[href="/creer"] {
-        max-width: 760px;
-    }
-}
-
-/* ===== Mes calendriers ===== */
-header p#utilisateur-connecte {
-    margin: 0.5rem 0 0;
-    font-size: 0.9rem;
-    color: var(--menthe);
-}
-
-header #bouton-deconnexion {
-    margin-left: 1rem;
-    padding: 0.4rem 1rem;
     font-size: 0.85rem;
 }
 
-main > a#lien-creer {
-    display: block;
-    max-width: 640px;
-    margin: 0 auto 1.5rem;
-    padding: 1rem;
-    text-align: center;
-    text-decoration: none;
-    font-family: var(--f-affiche);
-    font-size: 1.4rem;
-    color: var(--blanc);
-    background-color: var(--vert-moyen);
-    background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.08) 0 12px, transparent 12px 24px);
-    border-radius: var(--rayon);
-}
-
-#aucun-calendrier {
-    text-align: center;
-    color: var(--menthe);
-}
-
-#liste-calendriers {
-    display: grid;
-    gap: 1rem;
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 0;
-    list-style: none;
-}
-
-#liste-calendriers li {
-    padding: 1.25rem;
-    color: var(--vert);
-    background: var(--creme);
-    border-left: 8px solid var(--rouge);
-    border-radius: var(--rayon);
-}
-
-#liste-calendriers li:nth-child(even) {
-    border-left-color: var(--moutarde);
-}
-
-#liste-calendriers h2 {
-    margin: 0 0 0.25rem;
-    color: var(--rouge);
-}
-
-#liste-calendriers p {
-    margin: 0 0 0.75rem;
-}
-
-#liste-calendriers a {
-    display: block;
-    padding: 0.6rem;
-    font-weight: 700;
-    color: var(--rouge-fonce);
-    background: #fff;
-    border: 2px dashed var(--moutarde);
-    border-radius: 8px;
-    word-break: break-all;
-}
-
-/* ===== Modification d'un calendrier ===== */
+/* Média déjà enregistré (page de modification) */
 .media-actuel {
     margin: 0.75rem 0;
     padding: 0.75rem;
-    background: var(--creme);
-    border-radius: 8px;
+    background: var(--fond);
+    border-radius: 12px;
 }
 
 .media-actuel .apercu img,
@@ -747,7 +1030,7 @@ main > a#lien-creer {
     max-width: 100%;
     max-height: 160px;
     margin-bottom: 0.5rem;
-    border-radius: 6px;
+    border-radius: 10px;
 }
 
 .media-actuel label {
@@ -762,76 +1045,179 @@ main > a#lien-creer {
     font-size: 0.85rem;
 }
 
-#message-succes {
-    margin: 0.75rem 0 0;
-    padding: 0.6rem 0.8rem;
-    font-weight: 700;
-    color: var(--vert);
-    background: #e3f4ea;
-    border-left: 4px solid var(--vert-moyen);
-    border-radius: 4px;
+/* Résultat : le lien à partager */
+#lien-partage a {
+    display: block;
+    padding: 0.8rem;
+    font-weight: 500;
+    color: var(--rose);
+    background: var(--fond);
+    border: 1px dashed rgba(227, 166, 182, 0.4);
+    border-radius: 12px;
+    word-break: break-all;
 }
 
-#message-succes:empty {
-    display: none;
+/* =========================================================
+   Mes calendriers
+   ========================================================= */
+header > p#utilisateur-connecte {
+    flex-basis: 100%;
+    order: 1;             /* passe sous le titre et les boutons */
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--texte-pale);
+}
+
+header > #bouton-deconnexion {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+    color: var(--texte-doux);
+    background: var(--surface-2);
+    border: 1px solid var(--bord);
+}
+
+main > a#lien-creer {
+    display: block;
+    max-width: 640px;
+    margin: 0 auto 1.5rem;
+    padding: 0.85rem;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.05rem;
+    color: #1d1519;
+    background: var(--rose);
+    border-radius: 999px;
+}
+
+#aucun-calendrier {
+    text-align: center;
+    color: var(--texte-doux);
+}
+
+#liste-calendriers {
+    display: grid;
+    gap: 1rem;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+}
+
+#liste-calendriers li {
+    padding: 1.25rem 1.4rem;
+    color: var(--texte);
+    background: var(--surface);
+    border: 1px solid var(--bord);
+    border-radius: var(--rayon-carte);
+    box-shadow: var(--ombre);
+}
+
+#liste-calendriers h2 {
+    margin: 0 0 0.2rem;
+    font-size: 1.3rem;
+}
+
+#liste-calendriers p {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: var(--texte-doux);
+}
+
+#liste-calendriers a {
+    display: block;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+    color: var(--rose);
+    background: var(--fond);
+    border: 1px solid var(--bord);
+    border-radius: 12px;
+    text-decoration: none;
+    word-break: break-all;
 }
 
 #liste-calendriers a.lien-modifier {
     display: inline-block;
     margin-top: 0.75rem;
-    padding: 0.5rem 1.25rem;
-    color: var(--blanc);
-    background: var(--vert-moyen);
+    padding: 0.45rem 1.2rem;
+    font-weight: 500;
+    color: #1d1519;
+    background: var(--rose);
     border: none;
     border-radius: 999px;
-    text-decoration: none;
 }
 
 #liste-calendriers .bouton-supprimer {
     margin: 0.75rem 0 0 0.5rem;
-    padding: 0.5rem 1.25rem;
-    font-size: 1rem;
-    color: var(--rouge-fonce);
+    padding: 0.45rem 1.2rem;
+    font-size: 0.95rem;
+    color: var(--rouge);
     background: transparent;
-    border: 2px solid var(--rouge);
+    border: 1px solid rgba(201, 128, 136, 0.45);
 }
 
 #liste-calendriers .bouton-supprimer[data-confirmation="oui"] {
-    color: var(--blanc);
+    color: #1d1519;
     background: var(--rouge);
+    border-color: var(--rouge);
 }
 
-/* ===== Accueil : zone du compte ===== */
-.zone-compte {
+/* La page reste fixe : seule la liste des calendriers défile */
+body:has(#liste-calendriers) {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem 1rem;
-    margin-top: 0.75rem;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    padding-bottom: 1rem;
 }
 
-.zone-compte p {
-    flex-basis: 100%;
-    margin: 0;
-    font-size: 0.9rem;
-    color: var(--menthe);
+body:has(#liste-calendriers) main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;        /* sans ça, main grandit au lieu de laisser la liste défiler */
+    width: 100%;
 }
 
-.zone-compte a {
-    margin-top: 0;
+#liste-calendriers {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow-y: auto;
+    align-content: start;
+    padding: 0.25rem 0.25rem 3rem;
+    /* la liste s'efface en douceur en bas, au lieu d'être coupée net */
+    -webkit-mask-image: linear-gradient(180deg, #000 85%, transparent);
+    mask-image: linear-gradient(180deg, #000 85%, transparent);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
-.zone-compte button {
-    padding: 0.4rem 1rem;
-    font-size: 0.85rem;
+#liste-calendriers li {
+    box-shadow: none;     /* l'ombre serait coupée par la zone qui défile */
 }
 
-/* Liens dans les écrans pleins (page 404) */
-#ecran-noel a,
-#ecran-attente a {
-    color: var(--menthe);
-    font-weight: 700;
+/* ===== Formulaires sur grands écrans ===== */
+@media (min-width: 640px) {
+    main > form,
+    #resultat {
+        padding: 2rem;
+    }
+
+    #liste-cadeaux {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    main > form,
+    #resultat,
+    main > a#lien-creer {
+        max-width: 760px;
+    }
+
+    #formulaire-code {
+        max-width: 420px;
+    }
 }
 
 /* ===== Moins d'animations si l'utilisateur le demande ===== */
@@ -841,5 +1227,10 @@ main > a#lien-creer {
     *::after {
         animation: none !important;
         transition: none !important;
+    }
+
+    /* La neige reste, mais immobile */
+    body::after {
+        opacity: 0.6;
     }
 }

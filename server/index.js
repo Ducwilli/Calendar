@@ -136,7 +136,7 @@ const lireUtilisateurParEmail = db.prepare(`
 
 // ===== Simulation de date (null = vraie date) =====
 // Exemple de test : new Date(2026, 11, 7, 10, 0) pour le 7 décembre 2026 à 10 h
-const dateSimulee = null;
+const dateSimulee = new Date(2026, 11, 7, 10, 0);
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {

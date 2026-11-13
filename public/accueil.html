@@ -22,17 +22,22 @@
             <a href="/mes-calendriers">Mes calendriers</a>
             <button type="button" id="bouton-deconnexion">Se déconnecter</button>
         </nav>
+
+        <a href="/creer" class="bouton-creer">Créer mon calendrier</a>
     </header>
 
     <main>
-        <form>
-            <label for="code">Tu as reçu un calendrier ? Entre son code</label>
+        <section class="accroche">
+            <h2>Un cadeau par jour, jusqu'à Noël.</h2>
+            <p>Tu as reçu un calendrier ? Entre son code pour l'ouvrir.</p>
+        </section>
+
+        <form id="formulaire-code">
+            <label for="code">Code du calendrier</label>
             <input autocapitalize="none" autocorrect="off" spellcheck="false" type="text" id="code" name="code" required />
             <button type="submit">Voir le calendrier</button>
             <p id="paragraphe-erreur" aria-live="polite"></p>
         </form>
-
-        <a href="/creer">Créer mon calendrier</a>
     </main>
 
     <script src="/js/accueil.js" type="module"></script>
