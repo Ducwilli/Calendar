@@ -2,6 +2,25 @@
 const formulaireCode = document.querySelector("form");
 const champCode = document.getElementById("code");
 const messageErreur = document.getElementById("paragraphe-erreur");
+const zoneVisiteur = document.getElementById("zone-visiteur");
+const zoneConnecte = document.getElementById("zone-connecte");
+const utilisateurConnecte = document.getElementById("utilisateur-connecte");
+const boutonDeconnexion = document.getElementById("bouton-deconnexion");
+
+// ===== Connecté ou non ? =====
+const reponseMoi = await fetch("/api/moi");
+if (reponseMoi.ok) {
+    const { email } = await reponseMoi.json();
+    utilisateurConnecte.textContent = `Connecté en tant que ${email}`;
+    zoneConnecte.hidden = false;
+} else {
+    zoneVisiteur.hidden = false;
+}
+
+boutonDeconnexion.addEventListener("click", async () => {
+    await fetch("/api/deconnexion", { method: "POST" });
+    location.reload();
+});
 
 // ===== Nettoyage du code tapé =====
 // Accepte un code seul ("k7Qp2xVa") ou un lien complet (".../c/k7Qp2xVa")

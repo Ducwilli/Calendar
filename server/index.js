@@ -542,20 +542,25 @@ app.get("/api/mes-calendriers", exigerConnexion, (requete, reponse) => {
 });
 
 // ===== Pages =====
+// Envoie vers la connexion, en retenant la page demandée pour y revenir ensuite
+function redirigerVersConnexion(requete, reponse) {
+    reponse.redirect(`/connexion?suivant=${encodeURIComponent(requete.originalUrl)}`);
+}
+
 app.get("/", (requete, reponse) => {
     reponse.sendFile(resolve("public/accueil.html"));
 });
 
 app.get("/creer", (requete, reponse) => {
     if (requete.utilisateur === null) {
-        return reponse.redirect("/connexion");
+        return redirigerVersConnexion(requete, reponse);
     }
     reponse.sendFile(resolve("public/creer.html"));
 });
 
 app.get("/modifier/:code", (requete, reponse) => {
     if (requete.utilisateur === null) {
-        return reponse.redirect("/connexion");
+        return redirigerVersConnexion(requete, reponse);
     }
 
     const calendrier = lireCalendrierAvecProprietaire.get(requete.params.code);
@@ -571,7 +576,7 @@ app.get("/modifier/:code", (requete, reponse) => {
 
 app.get("/mes-calendriers", (requete, reponse) => {
     if (requete.utilisateur === null) {
-        return reponse.redirect("/connexion");
+        return redirigerVersConnexion(requete, reponse);
     }
     reponse.sendFile(resolve("public/mes-calendriers.html"));
 });

@@ -801,6 +801,32 @@ main > a#lien-creer {
     background: var(--rouge);
 }
 
+/* ===== Accueil : zone du compte ===== */
+.zone-compte {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem 1rem;
+    margin-top: 0.75rem;
+}
+
+.zone-compte p {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--menthe);
+}
+
+.zone-compte a {
+    margin-top: 0;
+}
+
+.zone-compte button {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+}
+
 /* ===== Moins d'animations si l'utilisateur le demande ===== */
 @media (prefers-reduced-motion: reduce) {
     *,

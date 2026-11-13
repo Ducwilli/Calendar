@@ -10,20 +10,31 @@
   <body>
     <header>
         <h1>Calendar - Calendrier de l'Avent</h1>
+
+        <!-- Une seule des deux zones est affichée, selon que l'on est connecté ou non -->
+        <nav id="zone-visiteur" class="zone-compte" hidden>
+            <a href="/connexion">Se connecter</a>
+            <a href="/inscription">Créer un compte</a>
+        </nav>
+
+        <nav id="zone-connecte" class="zone-compte" hidden>
+            <p id="utilisateur-connecte"></p>
+            <a href="/mes-calendriers">Mes calendriers</a>
+            <button type="button" id="bouton-deconnexion">Se déconnecter</button>
+        </nav>
     </header>
+
     <main>
         <form>
-            <label for="code">Code du calendrier : </label>
+            <label for="code">Tu as reçu un calendrier ? Entre son code</label>
             <input autocapitalize="none" autocorrect="off" spellcheck="false" type="text" id="code" name="code" required />
             <button type="submit">Voir le calendrier</button>
             <p id="paragraphe-erreur" aria-live="polite"></p>
         </form>
 
         <a href="/creer">Créer mon calendrier</a>
-
     </main>
 
     <script src="/js/accueil.js" type="module"></script>
-
   </body>
 </html>
