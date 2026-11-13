@@ -13,9 +13,12 @@
     "url": "git+https://github.com/Ducwilli/Calendar.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ducwilli",
   "license": "ISC",
   "type": "module",
+  "engines": {
+    "node": ">=22.5"
+  },
   "bugs": {
     "url": "https://github.com/Ducwilli/Calendar/issues"
   },

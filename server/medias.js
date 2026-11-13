@@ -1,7 +1,8 @@
 import multer from "multer";
 import { unlink } from "node:fs/promises";
-import { basename } from "node:path";
+import { basename, join } from "node:path";
 import { genererCode } from "./db.js";
+import { cheminUploads } from "./chemins.js";
 
 export const tailleMaxImage = 5 * 1024 * 1024;    // 5 Mo
 export const tailleMaxVideo = 30 * 1024 * 1024;   // 30 Mo
@@ -23,7 +24,7 @@ for (let jour = 1; jour <= 24; jour++) {
 }
 
 const stockage = multer.diskStorage({
-    destination: "uploads",
+    destination: cheminUploads,
     filename: (requete, fichier, rappel) => {
         rappel(null, genererCode() + extensions[fichier.mimetype]);
     }
@@ -90,6 +91,6 @@ export async function supprimerFichiers(fichiers) {
 export async function supprimerMedias(liens) {
     const chemins = liens
         .filter((lien) => typeof lien === "string" && lien.startsWith("/media/"))
-        .map((lien) => `uploads/${basename(lien)}`);
+        .map((lien) => join(cheminUploads, basename(lien)));
     await Promise.allSettled(chemins.map((chemin) => unlink(chemin)));
 }

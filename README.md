@@ -37,9 +37,10 @@ Il faut [Node.js](https://nodejs.org) (version 22 ou plus récente).
 
 ```
 npm install          # installe les dépendances (une seule fois)
-npm run remplir      # crée la base avec un compte et un calendrier de test
+npm run remplir      # en local uniquement : crée un compte et un calendrier de test
 npm run dev          # lance le serveur, qui redémarre à chaque modification
 ```
+⚠️ **Ne jamais lancer `npm run remplir` sur le serveur en ligne** : ce script crée un compte de test dont le mot de passe est écrit dans le code, donc connu de tous. En ligne, crée ton compte depuis la page d'inscription.
 
 Le site est alors sur http://localhost:3000. Le compte de test et le lien du calendrier de test sont affichés par `npm run remplir`.
 

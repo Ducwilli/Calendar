@@ -1,12 +1,13 @@
 import { DatabaseSync } from "node:sqlite";
 import { randomBytes } from "node:crypto";
+import { cheminDB } from "./chemins.js";
 
 // Code de partage aléatoire, impossible à deviner (8 caractères)
 export function genererCode() {
     return randomBytes(6).toString("base64url");
 }
 
-export const db = new DatabaseSync("calendrier.db");
+export const db = new DatabaseSync(cheminDB);
 db.exec("PRAGMA foreign_keys = ON;"); 
 db.exec(
     `

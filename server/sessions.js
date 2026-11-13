@@ -8,7 +8,7 @@ export const dureeSession = 30 * 24 * 60 * 60 * 1000;
 const optionsCookie = {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,          // à passer à true à la mise en ligne (HTTPS)
+    secure: process.env.NODE_ENV === "production",
     path: "/"
 };
 

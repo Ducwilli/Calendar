@@ -1,7 +1,7 @@
 import "./fuseau.js";   // en tout premier : fixe le fuseau horaire
 import express from "express";
 import cookieParser from "cookie-parser";
-import { resolve } from "node:path";
+import { join } from "node:path";
 import { db, genererCode } from "./db.js";
 import { creerLimiteur, limiter, repondreTropDEssais } from "./limiteur.js";
 import { recevoirMedias, supprimerFichiers, supprimerMedias, tailleMaxImage } from "./medias.js";
@@ -15,8 +15,16 @@ import {
     exigerConnexion,
     nettoyerSessionsExpirees
 } from "./sessions.js";
+import { cheminPublic, cheminUploads } from "./chemins.js";
 
 const app = express();
+
+const PORT = process.env.PORT ?? 3000;
+const IP = process.env.IP ?? process.env.HOST;
+
+if (process.env.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
 
 // ===== En-têtes de sécurité, sur toutes les réponses =====
 app.disable("x-powered-by");   // ne pas annoncer « Express » aux curieux
@@ -135,8 +143,26 @@ const lireUtilisateurParEmail = db.prepare(`
 `);
 
 // ===== Simulation de date (null = vraie date) =====
-// Exemple de test : new Date(2026, 11, 7, 10, 0) pour le 7 décembre 2026 à 10 h
-const dateSimulee = new Date(2026, 11, 7, 10, 0);
+// Pour tester : DATE_SIMULEE=2026-12-07T10:00 npm start (7 décembre 2026 à 10 h, heure de Paris)
+// Toujours mettre l'heure : une date seule (2026-12-07) serait lue en heure UTC
+function lireDateSimulee() {
+    const texte = process.env.DATE_SIMULEE;
+
+    // Variable absente : pas de simulation, on utilise la vraie date
+    if (texte === undefined) {
+        return null;
+    }
+
+    // Variable présente mais invalide : erreur de configuration, le serveur refuse de démarrer
+    const date = new Date(texte);
+    if (Number.isNaN(date.getTime())) {
+        throw new Error(`DATE_SIMULEE invalide : « ${texte} » (format attendu : 2026-12-07T10:00)`);
+    }
+
+    return date;
+}
+
+const dateSimulee = lireDateSimulee();
 const decalage = dateSimulee === null ? 0 : dateSimulee - Date.now();
 
 function maintenant() {
@@ -598,14 +624,14 @@ function redirigerVersConnexion(requete, reponse) {
 }
 
 app.get("/", (requete, reponse) => {
-    reponse.sendFile(resolve("public/accueil.html"));
+    reponse.sendFile(join(cheminPublic, "accueil.html"));
 });
 
 app.get("/creer", (requete, reponse) => {
     if (requete.utilisateur === null) {
         return redirigerVersConnexion(requete, reponse);
     }
-    reponse.sendFile(resolve("public/creer.html"));
+    reponse.sendFile(join(cheminPublic, "creer.html"));
 });
 
 app.get("/modifier/:code", (requete, reponse) => {
@@ -621,18 +647,18 @@ app.get("/modifier/:code", (requete, reponse) => {
         return reponse.status(403).send("Ce calendrier ne t'appartient pas.");
     }
 
-    reponse.sendFile(resolve("public/modifier.html"));
+    reponse.sendFile(join(cheminPublic, "modifier.html"));
 });
 
 app.get("/mes-calendriers", (requete, reponse) => {
     if (requete.utilisateur === null) {
         return redirigerVersConnexion(requete, reponse);
     }
-    reponse.sendFile(resolve("public/mes-calendriers.html"));
+    reponse.sendFile(join(cheminPublic, "mes-calendriers.html"));
 });
 
 app.get("/inscription", (requete, reponse) => {
-    reponse.sendFile(resolve("public/inscription.html"));
+    reponse.sendFile(join(cheminPublic, "inscription.html"));
 });
 
 app.get("/c/:code", (requete, reponse) => {
@@ -641,16 +667,16 @@ app.get("/c/:code", (requete, reponse) => {
         return reponse.status(404).send("Ce calendrier n'existe pas. Vérifie le lien qu'on t'a envoyé.");
     }
 
-    reponse.sendFile(resolve("public/index.html"));
+    reponse.sendFile(join(cheminPublic, "index.html"));
 });
 
 app.get("/connexion", (requete, reponse) => {
-    reponse.sendFile(resolve("public/connexion.html"));
+    reponse.sendFile(join(cheminPublic, "connexion.html"));
 });
 
 // ===== Fichiers =====
-app.use("/media", express.static("uploads"));
-app.use(express.static("public"));
+app.use("/media", express.static(cheminUploads));
+app.use(express.static(cheminPublic));
 
 // ===== Adresses inconnues =====
 // API : une réponse JSON, que les scripts du site savent lire
@@ -660,7 +686,7 @@ app.use("/api", (requete, reponse) => {
 
 // Pages : une vraie page 404, plutôt que le texte brut d'Express
 app.use((requete, reponse) => {
-    reponse.status(404).sendFile(resolve("public/404.html"));
+    reponse.status(404).sendFile(join(cheminPublic, "404.html"));
 });
 
 // ===== Gestion des erreurs =====
@@ -691,6 +717,6 @@ nettoyerSessionsExpirees();
 setInterval(nettoyerSessionsExpirees, unJour);
 
 // ===== Démarrage =====
-app.listen(3000, () => {
-    console.log("Serveur démarré sur http://localhost:3000");
+app.listen(PORT, IP, () => {
+    console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
