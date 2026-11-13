@@ -38,8 +38,51 @@ function creerCarte(calendrier) {
     lienModifier.className = "lien-modifier";
     lienModifier.textContent = "Modifier";
 
-    carte.append(titre, details, lien, lienModifier);
+    const boutonSupprimer = document.createElement("button");
+    boutonSupprimer.type = "button";
+    boutonSupprimer.className = "bouton-supprimer";
+    boutonSupprimer.textContent = "Supprimer";
+    boutonSupprimer.addEventListener("click", () => {
+        demanderSuppression(calendrier, carte, boutonSupprimer);
+    });
+
+    carte.append(titre, details, lien, lienModifier, boutonSupprimer);
     return carte;
+}
+
+// ===== Suppression, en deux clics pour éviter les accidents =====
+async function demanderSuppression(calendrier, carte, bouton) {
+    // Premier clic : le bouton demande une confirmation pendant 5 secondes
+    if (bouton.dataset.confirmation !== "oui") {
+        bouton.dataset.confirmation = "oui";
+        bouton.textContent = "Confirmer la suppression";
+        setTimeout(() => {
+            bouton.dataset.confirmation = "";
+            bouton.textContent = "Supprimer";
+        }, 5000);
+        return;
+    }
+
+    // Second clic : suppression
+    bouton.disabled = true;
+    const reponse = await fetch(`/api/calendriers/${encodeURIComponent(calendrier.codePartage)}`, {
+        method: "DELETE"
+    });
+
+    if (reponse.status === 401) {
+        location.href = "/connexion";
+        return;
+    }
+    if (!reponse.ok) {
+        bouton.disabled = false;
+        bouton.textContent = "Échec, réessaie";
+        return;
+    }
+
+    carte.remove();
+    if (listeCalendriers.children.length === 0) {
+        messageAucun.hidden = false;
+    }
 }
 
 const reponseCalendriers = await fetch("/api/mes-calendriers");

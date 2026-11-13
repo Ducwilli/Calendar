@@ -68,6 +68,11 @@ const supprimerCadeauxDuCalendrier = db.prepare(`
     WHERE calendrier_id = ?
 `);
 
+const supprimerCalendrierParId = db.prepare(`
+    DELETE FROM calendriers
+    WHERE id = ?
+`);
+
 const lireMesCalendriers = db.prepare(`
     SELECT code_partage AS codePartage,
            annee,
@@ -444,6 +449,22 @@ app.put("/api/calendriers/:code", exigerConnexion, recevoirMedias, async (requet
     await supprimerMedias(liensAbandonnes);
 
     reponse.json({ message: "Calendrier modifié" });
+});
+
+// Suppression, réservée au propriétaire : le calendrier, ses cadeaux (cascade) et ses fichiers
+app.delete("/api/calendriers/:code", exigerConnexion, async (requete, reponse) => {
+    const calendrier = calendrierDuProprietaire(requete, reponse);
+    if (calendrier === null) {
+        return;
+    }
+
+    // Lire les médias avant la suppression : après, les lignes n'existent plus
+    const liensMedias = lireTousLesCadeaux.all(calendrier.id).map((cadeau) => cadeau.lienMedia);
+
+    supprimerCalendrierParId.run(calendrier.id);
+    await supprimerMedias(liensMedias);
+
+    reponse.status(204).end();
 });
 
 // ===== Routes de l'API : comptes =====

@@ -787,6 +787,20 @@ main > a#lien-creer {
     text-decoration: none;
 }
 
+#liste-calendriers .bouton-supprimer {
+    margin: 0.75rem 0 0 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    color: var(--rouge-fonce);
+    background: transparent;
+    border: 2px solid var(--rouge);
+}
+
+#liste-calendriers .bouton-supprimer[data-confirmation="oui"] {
+    color: var(--blanc);
+    background: var(--rouge);
+}
+
 /* ===== Moins d'animations si l'utilisateur le demande ===== */
 @media (prefers-reduced-motion: reduce) {
     *,
