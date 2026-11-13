@@ -827,6 +827,13 @@ main > a#lien-creer {
     font-size: 0.85rem;
 }
 
+/* Liens dans les écrans pleins (page 404) */
+#ecran-noel a,
+#ecran-attente a {
+    color: var(--menthe);
+    font-weight: 700;
+}
+
 /* ===== Moins d'animations si l'utilisateur le demande ===== */
 @media (prefers-reduced-motion: reduce) {
     *,

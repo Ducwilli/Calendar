@@ -1,7 +1,9 @@
+import "./fuseau.js";   // en tout premier : fixe le fuseau horaire
 import express from "express";
 import cookieParser from "cookie-parser";
 import { resolve } from "node:path";
 import { db, genererCode } from "./db.js";
+import { creerLimiteur, limiter, repondreTropDEssais } from "./limiteur.js";
 import { recevoirMedias, supprimerFichiers, supprimerMedias, tailleMaxImage } from "./medias.js";
 import { hacherMotDePasse, verifierMotDePasse } from "./motsDePasse.js";
 import {
@@ -15,9 +17,41 @@ import {
 } from "./sessions.js";
 
 const app = express();
+
+// ===== En-têtes de sécurité, sur toutes les réponses =====
+app.disable("x-powered-by");   // ne pas annoncer « Express » aux curieux
+app.use((requete, reponse, suivant) => {
+    reponse.set({
+        // Le navigateur respecte le type annoncé, sans le deviner : un fichier envoyé
+        // ne peut pas être « interprété » comme une page ou un script
+        "X-Content-Type-Options": "nosniff",
+        // Le site ne peut pas être affiché dans un cadre (iframe) sur un autre site
+        "X-Frame-Options": "DENY",
+        // L'adresse de la page (qui contient le code de partage) n'est jamais
+        // transmise aux autres sites, comme Google Fonts
+        "Referrer-Policy": "same-origin"
+    });
+    suivant();
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(identifierUtilisateur);
+
+// ===== Limites d'essais =====
+const quinzeMinutes = 15 * 60 * 1000;
+const uneHeure = 60 * 60 * 1000;
+
+// Connexion : 5 échecs par email, et 30 échecs par adresse IP, toutes les 15 minutes
+const limiteConnexionEmail = creerLimiteur({ maximum: 5, fenetre: quinzeMinutes });
+const limiteConnexionIp = creerLimiteur({ maximum: 30, fenetre: quinzeMinutes });
+
+// Inscription : 5 comptes par adresse IP et par heure
+const limiteInscription = creerLimiteur({ maximum: 5, fenetre: uneHeure });
+
+// Création, modification, suppression : 60 par utilisateur et par heure
+const limiteEcritures = creerLimiteur({ maximum: 60, fenetre: uneHeure });
+const limiterEcritures = limiter(limiteEcritures, (requete) => requete.utilisateur.id);
 
 // ===== Requêtes SQL, préparées une seule fois =====
 const lireCalendrier = db.prepare(`
@@ -294,9 +328,13 @@ app.get("/api/calendriers/:code", (requete, reponse) => {
         return reponse.status(404).json({ erreur: "Calendrier introuvable" });
     }
 
+    // Les dates clés sont calculées ici, à l'heure française, et envoyées en millisecondes :
+    // le navigateur n'a plus à les calculer avec son propre fuseau horaire
     reponse.json({
         annee: calendrier.annee,
-        date: maintenant()
+        date: maintenant(),
+        premierDecembre: new Date(calendrier.annee, 11, 1).getTime(),
+        noel: new Date(calendrier.annee, 11, 25).getTime()
     });
 });
 
@@ -327,7 +365,7 @@ app.get("/api/calendriers/:code/cadeaux/:jour", (requete, reponse) => {
     reponse.json(cadeau);
 });
 
-app.post("/api/calendriers", exigerConnexion, recevoirMedias, async (requete, reponse) => {
+app.post("/api/calendriers", exigerConnexion, limiterEcritures, recevoirMedias, async (requete, reponse) => {
     // 1. Vérifier tout ce qui arrive (textes et fichiers)
     const resultat = verifierCalendrier(requete.body, requete.files);
     if (resultat.erreur) {
@@ -394,7 +432,7 @@ app.get("/api/calendriers/:code/edition", exigerConnexion, (requete, reponse) =>
 });
 
 // Modification, réservée au propriétaire : remplace l'année et tous les cadeaux
-app.put("/api/calendriers/:code", exigerConnexion, recevoirMedias, async (requete, reponse) => {
+app.put("/api/calendriers/:code", exigerConnexion, limiterEcritures, recevoirMedias, async (requete, reponse) => {
     // 1. Autorisation (les fichiers déjà reçus sont supprimés en cas de refus)
     const calendrier = calendrierDuProprietaire(requete, reponse);
     if (calendrier === null) {
@@ -452,7 +490,7 @@ app.put("/api/calendriers/:code", exigerConnexion, recevoirMedias, async (requet
 });
 
 // Suppression, réservée au propriétaire : le calendrier, ses cadeaux (cascade) et ses fichiers
-app.delete("/api/calendriers/:code", exigerConnexion, async (requete, reponse) => {
+app.delete("/api/calendriers/:code", exigerConnexion, limiterEcritures, async (requete, reponse) => {
     const calendrier = calendrierDuProprietaire(requete, reponse);
     if (calendrier === null) {
         return;
@@ -468,7 +506,7 @@ app.delete("/api/calendriers/:code", exigerConnexion, async (requete, reponse) =
 });
 
 // ===== Routes de l'API : comptes =====
-app.post("/api/inscription", async (requete, reponse) => {
+app.post("/api/inscription", limiter(limiteInscription, (requete) => requete.ip), async (requete, reponse) => {
     // 1. Vérifier l'email et le mot de passe
     const resultat = verifierInscription(requete.body);
     if (resultat.erreur) {
@@ -504,18 +542,30 @@ app.post("/api/connexion", async (requete, reponse) => {
         return reponse.status(400).json({ erreur: "L'email et le mot de passe sont obligatoires" });
     }
 
-    // 2. Retrouver l'utilisateur, et vérifier le mot de passe dans tous les cas
+    // 2. Trop d'échecs récents pour cet email ou cette adresse IP ?
+    const etatEmail = limiteConnexionEmail.verifier(identifiants.email);
+    const etatIp = limiteConnexionIp.verifier(requete.ip);
+    if (etatEmail.bloque || etatIp.bloque) {
+        return repondreTropDEssais(reponse, Math.max(etatEmail.secondesRestantes, etatIp.secondesRestantes));
+    }
+
+    // 3. Retrouver l'utilisateur, et vérifier le mot de passe dans tous les cas
     const utilisateur = lireUtilisateurParEmail.get(identifiants.email);
     const sel = utilisateur?.sel ?? empreinteFactice.sel;
     const empreinte = utilisateur?.empreinte ?? empreinteFactice.empreinte;
     const motDePasseCorrect = await verifierMotDePasse(identifiants.motDePasse, sel, empreinte);
 
-    // 3. Même réponse pour un email inconnu et un mauvais mot de passe
+    // 4. Même réponse pour un email inconnu et un mauvais mot de passe ; l'échec est compté
     if (utilisateur === undefined || !motDePasseCorrect) {
+        limiteConnexionEmail.compter(identifiants.email);
+        limiteConnexionIp.compter(requete.ip);
         return reponse.status(401).json({ erreur: "Email ou mot de passe incorrect" });
     }
 
-    // 4. Ouvrir la session
+    // 5. Connexion réussie : les échecs passés de cet email sont oubliés
+    limiteConnexionEmail.oublier(identifiants.email);
+
+    // 6. Ouvrir la session
     const jeton = creerSession(utilisateur.id);
     poserCookieSession(reponse, jeton);
 
@@ -601,6 +651,40 @@ app.get("/connexion", (requete, reponse) => {
 // ===== Fichiers =====
 app.use("/media", express.static("uploads"));
 app.use(express.static("public"));
+
+// ===== Adresses inconnues =====
+// API : une réponse JSON, que les scripts du site savent lire
+app.use("/api", (requete, reponse) => {
+    reponse.status(404).json({ erreur: "Adresse d'API inconnue" });
+});
+
+// Pages : une vraie page 404, plutôt que le texte brut d'Express
+app.use((requete, reponse) => {
+    reponse.status(404).sendFile(resolve("public/404.html"));
+});
+
+// ===== Gestion des erreurs =====
+// Un middleware à 4 paramètres est le gestionnaire d'erreurs d'Express : il reçoit toute
+// erreur levée dans une route (y compris dans une route async, depuis Express 5)
+app.use((erreur, requete, reponse, suivant) => {
+    // JSON mal formé envoyé par le navigateur : c'est une erreur de la requête, pas du serveur
+    if (erreur.type === "entity.parse.failed") {
+        return reponse.status(400).json({ erreur: "Le JSON envoyé est mal formé" });
+    }
+
+    // Si une réponse a déjà commencé, on laisse Express couper la connexion
+    if (reponse.headersSent) {
+        return suivant(erreur);
+    }
+
+    // Le détail de l'erreur reste dans le Terminal : il ne doit jamais être envoyé au visiteur
+    console.error("Erreur inattendue :", requete.method, requete.originalUrl, erreur);
+
+    if (requete.originalUrl.startsWith("/api")) {
+        return reponse.status(500).json({ erreur: "Erreur interne du serveur, réessaie plus tard" });
+    }
+    reponse.status(500).send("Erreur interne du serveur, réessaie plus tard.");
+});
 
 // ===== Nettoyage des sessions expirées : au démarrage, puis une fois par jour =====
 nettoyerSessionsExpirees();

@@ -43,7 +43,13 @@ formulaireCode.addEventListener("submit", async (evenement) => {
         return;
     }
 
-    const reponse = await fetch(`/api/calendriers/${encodeURIComponent(code)}`);
+    let reponse;
+    try {
+        reponse = await fetch(`/api/calendriers/${encodeURIComponent(code)}`);
+    } catch {
+        messageErreur.textContent = "Impossible de joindre le serveur. Vérifie ta connexion.";
+        return;
+    }
     if (!reponse.ok) {
         messageErreur.textContent = "Ce code ne correspond à aucun calendrier. Vérifie les majuscules et minuscules.";
         return;

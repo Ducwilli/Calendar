@@ -12,19 +12,32 @@ const boutonNonOuverts = document.getElementById("bouton-non-ouverts");
 
 // ===== Informations du serveur =====
 const codePartage = location.pathname.split("/")[2];
-const reponseCalendrier = await fetch(`/api/calendriers/${codePartage}`);
-
-if (!reponseCalendrier.ok) {
-    ecranAttente.querySelector("h2").textContent = "Calendrier introuvable";
-    compteARebours.textContent = "Vérifie le lien";
+// Affiche un message plein écran à la place du calendrier, puis arrête le script
+function arreterAvecMessage(titre, message, detail) {
+    ecranAttente.querySelector("h2").textContent = titre;
+    compteARebours.textContent = message;
     ecranAttente.hidden = false;
     grille.hidden = true;
-    throw new Error(`Calendrier introuvable (code ${codePartage}, statut ${reponseCalendrier.status})`);
+    throw new Error(detail);
+}
+
+let reponseCalendrier;
+try {
+    reponseCalendrier = await fetch(`/api/calendriers/${encodeURIComponent(codePartage)}`);
+} catch {
+    arreterAvecMessage("Pas de connexion", "Réessaie plus tard", "Serveur injoignable");
+}
+
+if (!reponseCalendrier.ok) {
+    arreterAvecMessage(
+        "Calendrier introuvable",
+        "Vérifie le lien",
+        `Calendrier introuvable (code ${codePartage}, statut ${reponseCalendrier.status})`
+    );
 }
 
 const infosCalendrier = await reponseCalendrier.json();
 
-const annee = infosCalendrier.annee;
 const dateServeur = new Date(infosCalendrier.date);
 const decalage = dateServeur - Date.now();
 
@@ -35,8 +48,9 @@ function maintenant() {
 
 // ===== Dates de référence =====
 const unJour = 1000 * 60 * 60 * 24;
-const premierDecembre = new Date(annee, 11, 1);
-const noel = new Date(annee, 11, 25);
+// Calculées par le serveur, à l'heure française
+const premierDecembre = infosCalendrier.premierDecembre;
+const noel = infosCalendrier.noel;
 
 // ===== Stockage des jours ouverts =====
 const cleStockage = `calendrier-avent-${codePartage}-jours-ouverts`;
@@ -68,7 +82,16 @@ function dernierJourOuvrable(dateCalcule) {
 // ===== Fenêtre cadeau =====
 // Renvoie true si un cadeau a été affiché
 async function afficherCadeau(numeroJour) {
-    const reponse = await fetch(`/api/calendriers/${codePartage}/cadeaux/${numeroJour}`);
+    let reponse;
+    try {
+        reponse = await fetch(`/api/calendriers/${encodeURIComponent(codePartage)}/cadeaux/${numeroJour}`);
+    } catch {
+        titreFenetre.textContent = `Jour ${numeroJour}`;
+        mediaFenetreCadeau.replaceChildren();
+        texteFenetreCadeau.textContent = "Impossible de joindre le serveur. Vérifie ta connexion et réessaie.";
+        fenetreCadeau.showModal();
+        return false;
+    }
 
     titreFenetre.textContent = `Jour ${numeroJour}`;
     mediaFenetreCadeau.replaceChildren();

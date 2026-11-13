@@ -1,3 +1,4 @@
+import "./fuseau.js";   // en tout premier : fixe le fuseau horaire
 import { db, genererCode } from "./db.js";
 import { hacherMotDePasse } from "./motsDePasse.js";
 import { calendrierAvent } from "./donnees.js";
