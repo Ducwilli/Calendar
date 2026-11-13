@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import { resolve } from "node:path";
 import { db, genererCode } from "./db.js";
-import { recevoirMedias, supprimerFichiers, tailleMaxImage } from "./medias.js";
+import { recevoirMedias, supprimerFichiers, supprimerMedias, tailleMaxImage } from "./medias.js";
 import { hacherMotDePasse, verifierMotDePasse } from "./motsDePasse.js";
 import {
     creerSession,
@@ -38,6 +38,34 @@ const lireCadeau = db.prepare(`
 const insererCalendrier = db.prepare(`
     INSERT INTO calendriers (proprietaire_id, annee, code_partage)
     VALUES (?, ?, ?)
+`);
+
+const lireCalendrierAvecProprietaire = db.prepare(`
+    SELECT id, annee, proprietaire_id AS proprietaireId
+    FROM calendriers
+    WHERE code_partage = ?
+`);
+
+const lireTousLesCadeaux = db.prepare(`
+    SELECT jour,
+           texte,
+           type_media AS typeMedia,
+           lien_media AS lienMedia,
+           texte_alt AS texteAlt
+    FROM cadeaux
+    WHERE calendrier_id = ?
+    ORDER BY jour
+`);
+
+const modifierAnnee = db.prepare(`
+    UPDATE calendriers
+    SET annee = ?
+    WHERE id = ?
+`);
+
+const supprimerCadeauxDuCalendrier = db.prepare(`
+    DELETE FROM cadeaux
+    WHERE calendrier_id = ?
 `);
 
 const lireMesCalendriers = db.prepare(`
@@ -115,8 +143,10 @@ const anneeMin = 2026;
 const longueurMax = 1000;
 const longueurMaxAlt = 300;
 
-// Renvoie { erreur } si quelque chose ne va pas, sinon { annee, cadeaux } nettoyés
-function verifierCalendrier(champs, fichiers) {
+// Renvoie { erreur } si quelque chose ne va pas, sinon { annee, cadeaux } nettoyés.
+// mediasExistants : pour une modification, les médias déjà enregistrés, par jour
+// (une Map jour → { typeMedia, lienMedia }). Vide pour une création.
+function verifierCalendrier(champs, fichiers, mediasExistants = new Map()) {
     if (!estUnObjet(champs)) {
         return { erreur: "Données invalides" };
     }
@@ -131,14 +161,19 @@ function verifierCalendrier(champs, fichiers) {
     for (let jour = 1; jour <= 24; jour++) {
         const texte = lireChamp(champs, `texte-${jour}`);
         const alt = lireChamp(champs, `alt-${jour}`);
-        if (texte === null || alt === null) {
+        const choixMedia = lireChamp(champs, `choix-media-${jour}`);
+        if (texte === null || alt === null || (choixMedia !== "" && choixMedia !== "supprimer")) {
             return { erreur: `Les champs du jour ${jour} sont invalides` };
         }
 
         const fichier = fichiers?.[`media-${jour}`]?.[0];
 
+        // Média déjà enregistré, gardé s'il n'est ni remplacé ni supprimé
+        const mediaExistant = mediasExistants.get(jour);
+        const mediaGarde = fichier === undefined && choixMedia !== "supprimer" ? mediaExistant : undefined;
+
         // Jour laissé vide : pas de cadeau
-        if (texte === "" && fichier === undefined) {
+        if (texte === "" && fichier === undefined && mediaGarde === undefined) {
             continue;
         }
 
@@ -154,18 +189,22 @@ function verifierCalendrier(champs, fichiers) {
             typeMedia = fichier.mimetype.startsWith("image/") ? "image" : "video";
             lienMedia = `/media/${fichier.filename}`;
 
-            if (typeMedia === "image") {
-                if (fichier.size > tailleMaxImage) {
-                    return { erreur: `La photo du jour ${jour} dépasse 5 Mo` };
-                }
-                if (alt === "") {
-                    return { erreur: `Décris la photo du jour ${jour} en quelques mots` };
-                }
-                if (alt.length > longueurMaxAlt) {
-                    return { erreur: `La description de la photo du jour ${jour} dépasse ${longueurMaxAlt} caractères` };
-                }
-                texteAlt = alt;
+            if (typeMedia === "image" && fichier.size > tailleMaxImage) {
+                return { erreur: `La photo du jour ${jour} dépasse 5 Mo` };
             }
+        } else if (mediaGarde !== undefined) {
+            typeMedia = mediaGarde.typeMedia;
+            lienMedia = mediaGarde.lienMedia;
+        }
+
+        if (typeMedia === "image") {
+            if (alt === "") {
+                return { erreur: `Décris la photo du jour ${jour} en quelques mots` };
+            }
+            if (alt.length > longueurMaxAlt) {
+                return { erreur: `La description de la photo du jour ${jour} dépasse ${longueurMaxAlt} caractères` };
+            }
+            texteAlt = alt;
         }
 
         cadeaux.push({
@@ -321,6 +360,92 @@ app.post("/api/calendriers", exigerConnexion, recevoirMedias, async (requete, re
     reponse.status(201).json({ codePartage });
 });
 
+// ===== Autorisation : le calendrier appartient-il à l'utilisateur connecté ? =====
+// Renvoie le calendrier, ou null après avoir répondu 404 ou 403
+function calendrierDuProprietaire(requete, reponse) {
+    const calendrier = lireCalendrierAvecProprietaire.get(requete.params.code);
+    if (calendrier === undefined) {
+        reponse.status(404).json({ erreur: "Calendrier introuvable" });
+        return null;
+    }
+    if (calendrier.proprietaireId !== requete.utilisateur.id) {
+        reponse.status(403).json({ erreur: "Ce calendrier ne t'appartient pas" });
+        return null;
+    }
+    return calendrier;
+}
+
+// Lecture complète, réservée au propriétaire : tous les cadeaux, même les jours futurs
+app.get("/api/calendriers/:code/edition", exigerConnexion, (requete, reponse) => {
+    const calendrier = calendrierDuProprietaire(requete, reponse);
+    if (calendrier === null) {
+        return;
+    }
+
+    reponse.json({
+        annee: calendrier.annee,
+        cadeaux: lireTousLesCadeaux.all(calendrier.id)
+    });
+});
+
+// Modification, réservée au propriétaire : remplace l'année et tous les cadeaux
+app.put("/api/calendriers/:code", exigerConnexion, recevoirMedias, async (requete, reponse) => {
+    // 1. Autorisation (les fichiers déjà reçus sont supprimés en cas de refus)
+    const calendrier = calendrierDuProprietaire(requete, reponse);
+    if (calendrier === null) {
+        await supprimerFichiers(requete.files);
+        return;
+    }
+
+    // 2. Les médias actuels, par jour
+    const anciensCadeaux = lireTousLesCadeaux.all(calendrier.id);
+    const mediasExistants = new Map();
+    for (const cadeau of anciensCadeaux) {
+        if (cadeau.lienMedia !== null) {
+            mediasExistants.set(cadeau.jour, { typeMedia: cadeau.typeMedia, lienMedia: cadeau.lienMedia });
+        }
+    }
+
+    // 3. Vérifier tout ce qui arrive
+    const resultat = verifierCalendrier(requete.body, requete.files, mediasExistants);
+    if (resultat.erreur) {
+        await supprimerFichiers(requete.files);
+        return reponse.status(400).json({ erreur: resultat.erreur });
+    }
+
+    // 4. Tout remplacer, ou rien
+    db.exec("BEGIN");
+    try {
+        modifierAnnee.run(resultat.annee, calendrier.id);
+        supprimerCadeauxDuCalendrier.run(calendrier.id);
+        for (const cadeau of resultat.cadeaux) {
+            insererCadeau.run(
+                calendrier.id,
+                cadeau.jour,
+                cadeau.texte,
+                cadeau.typeMedia,
+                cadeau.lienMedia,
+                cadeau.texteAlt
+            );
+        }
+        db.exec("COMMIT");
+    } catch (erreur) {
+        db.exec("ROLLBACK");
+        await supprimerFichiers(requete.files);
+        console.error("Échec de la modification d'un calendrier :", erreur);
+        return reponse.status(500).json({ erreur: "Impossible d'enregistrer les modifications, réessaie plus tard" });
+    }
+
+    // 5. Seulement maintenant : supprimer du disque les médias qui ne servent plus
+    const liensConserves = new Set(resultat.cadeaux.map((cadeau) => cadeau.lienMedia));
+    const liensAbandonnes = anciensCadeaux
+        .map((cadeau) => cadeau.lienMedia)
+        .filter((lien) => lien !== null && !liensConserves.has(lien));
+    await supprimerMedias(liensAbandonnes);
+
+    reponse.json({ message: "Calendrier modifié" });
+});
+
 // ===== Routes de l'API : comptes =====
 app.post("/api/inscription", async (requete, reponse) => {
     // 1. Vérifier l'email et le mot de passe
@@ -405,6 +530,22 @@ app.get("/creer", (requete, reponse) => {
         return reponse.redirect("/connexion");
     }
     reponse.sendFile(resolve("public/creer.html"));
+});
+
+app.get("/modifier/:code", (requete, reponse) => {
+    if (requete.utilisateur === null) {
+        return reponse.redirect("/connexion");
+    }
+
+    const calendrier = lireCalendrierAvecProprietaire.get(requete.params.code);
+    if (calendrier === undefined) {
+        return reponse.status(404).send("Ce calendrier n'existe pas.");
+    }
+    if (calendrier.proprietaireId !== requete.utilisateur.id) {
+        return reponse.status(403).send("Ce calendrier ne t'appartient pas.");
+    }
+
+    reponse.sendFile(resolve("public/modifier.html"));
 });
 
 app.get("/mes-calendriers", (requete, reponse) => {

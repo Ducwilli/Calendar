@@ -1,5 +1,6 @@
 import multer from "multer";
 import { unlink } from "node:fs/promises";
+import { basename } from "node:path";
 import { genererCode } from "./db.js";
 
 export const tailleMaxImage = 5 * 1024 * 1024;    // 5 Mo
@@ -82,4 +83,13 @@ export async function supprimerFichiers(fichiers) {
     }
     const liste = Object.values(fichiers).flat();
     await Promise.allSettled(liste.map((fichier) => unlink(fichier.path)));
+}
+
+// Supprime du disque des médias enregistrés, à partir de leurs liens (/media/xxx.jpg).
+// Les liens qui ne sont pas dans /media/ (par exemple /assets/...) ne sont jamais touchés.
+export async function supprimerMedias(liens) {
+    const chemins = liens
+        .filter((lien) => typeof lien === "string" && lien.startsWith("/media/"))
+        .map((lien) => `uploads/${basename(lien)}`);
+    await Promise.allSettled(chemins.map((chemin) => unlink(chemin)));
 }

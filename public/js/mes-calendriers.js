@@ -33,7 +33,12 @@ function creerCarte(calendrier) {
     lien.href = adresse;
     lien.textContent = adresse;
 
-    carte.append(titre, details, lien);
+    const lienModifier = document.createElement("a");
+    lienModifier.href = `/modifier/${calendrier.codePartage}`;
+    lienModifier.className = "lien-modifier";
+    lienModifier.textContent = "Modifier";
+
+    carte.append(titre, details, lien, lienModifier);
     return carte;
 }
 

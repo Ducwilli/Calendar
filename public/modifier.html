@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Modifier un calendrier</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <header>
+        <h1>Modifier mon calendrier</h1>
+        <a href="/mes-calendriers">Retour à mes calendriers</a>
+    </header>
+
+    <main>
+        <form id="formulaire-modification">
+            <p id="lien-partage"></p>
+
+            <label for="annee">Année</label>
+            <input type="number" id="annee" name="annee" min="2026" required />
+
+            <h2>Les cadeaux</h2>
+            <p>Les cadeaux déjà enregistrés sont pré-remplis. Vider un jour supprime son cadeau. Photos : 5 Mo maximum. Vidéos : MP4 ou WebM, 30 Mo maximum.</p>
+
+            <div id="liste-cadeaux"></div>
+
+            <p id="message-erreur" aria-live="polite"></p>
+            <p id="message-succes" aria-live="polite"></p>
+
+            <button type="submit">Enregistrer les modifications</button>
+        </form>
+    </main>
+
+    <script type="module" src="/js/modifier.js"></script>
+  </body>
+</html>
