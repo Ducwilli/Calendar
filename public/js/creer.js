@@ -136,6 +136,12 @@ formulaire.addEventListener("submit", async (evenement) => {
         boutonCreer.textContent = "Créer mon calendrier";
     }
 
+
+    if (reponse.status === 401) {
+        messageErreur.textContent = "Ta session a expiré. Reconnecte-toi, puis recommence (tes fichiers devront être choisis à nouveau).";
+        return;
+    }
+
     if (!reponse.ok) {
         const probleme = await reponse.json();
         messageErreur.textContent = probleme.erreur;

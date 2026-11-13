@@ -36,8 +36,17 @@ const lireCadeau = db.prepare(`
 `);
 
 const insererCalendrier = db.prepare(`
-    INSERT INTO calendriers (annee, code_partage)
-    VALUES (?, ?)
+    INSERT INTO calendriers (proprietaire_id, annee, code_partage)
+    VALUES (?, ?, ?)
+`);
+
+const lireMesCalendriers = db.prepare(`
+    SELECT code_partage AS codePartage,
+           annee,
+           (SELECT COUNT(*) FROM cadeaux WHERE calendrier_id = calendriers.id) AS nombreCadeaux
+    FROM calendriers
+    WHERE proprietaire_id = ?
+    ORDER BY annee DESC, id DESC
 `);
 
 const insererCadeau = db.prepare(`
@@ -274,7 +283,7 @@ app.get("/api/calendriers/:code/cadeaux/:jour", (requete, reponse) => {
     reponse.json(cadeau);
 });
 
-app.post("/api/calendriers", recevoirMedias, async (requete, reponse) => {
+app.post("/api/calendriers", exigerConnexion, recevoirMedias, async (requete, reponse) => {
     // 1. Vérifier tout ce qui arrive (textes et fichiers)
     const resultat = verifierCalendrier(requete.body, requete.files);
     if (resultat.erreur) {
@@ -286,7 +295,7 @@ app.post("/api/calendriers", recevoirMedias, async (requete, reponse) => {
     const codePartage = genererCode();
     db.exec("BEGIN");
     try {
-        const insertion = insererCalendrier.run(resultat.annee, codePartage);
+        const insertion = insererCalendrier.run(requete.utilisateur.id, resultat.annee, codePartage);
         const calendrierId = insertion.lastInsertRowid;
 
         for (const cadeau of resultat.cadeaux) {
@@ -381,13 +390,28 @@ app.get("/api/moi", exigerConnexion, (requete, reponse) => {
     reponse.json({ email: requete.utilisateur.email });
 });
 
+app.get("/api/mes-calendriers", exigerConnexion, (requete, reponse) => {
+    const calendriers = lireMesCalendriers.all(requete.utilisateur.id);
+    reponse.json(calendriers);
+});
+
 // ===== Pages =====
 app.get("/", (requete, reponse) => {
     reponse.sendFile(resolve("public/accueil.html"));
 });
 
 app.get("/creer", (requete, reponse) => {
+    if (requete.utilisateur === null) {
+        return reponse.redirect("/connexion");
+    }
     reponse.sendFile(resolve("public/creer.html"));
+});
+
+app.get("/mes-calendriers", (requete, reponse) => {
+    if (requete.utilisateur === null) {
+        return reponse.redirect("/connexion");
+    }
+    reponse.sendFile(resolve("public/mes-calendriers.html"));
 });
 
 app.get("/inscription", (requete, reponse) => {

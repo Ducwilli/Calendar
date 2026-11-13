@@ -54,8 +54,20 @@ export function supprimerSession(jeton) {
     supprimerSessionParJeton.run(hacherJeton(jeton));
 }
 
+// Retire de la réponse un cookie de session déjà prévu (par exemple un effacement
+// demandé par identifierUtilisateur), pour ne jamais envoyer deux ordres contradictoires
+function retirerCookieSessionPrevu(reponse) {
+    const entetes = reponse.getHeader("Set-Cookie");
+    if (entetes === undefined) {
+        return;
+    }
+    const liste = Array.isArray(entetes) ? entetes : [entetes];
+    reponse.setHeader("Set-Cookie", liste.filter((entete) => !entete.startsWith("session=")));
+}
+
 // Écrit le cookie de session dans la réponse
 export function poserCookieSession(reponse, jeton) {
+    retirerCookieSessionPrevu(reponse);
     reponse.cookie("session", jeton, { ...optionsCookie, maxAge: dureeSession });
 }
 
